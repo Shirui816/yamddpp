@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*- 
+# Author: shirui <shirui816@gmail.com>
+
+import numpy as np
+
+
+def body_hash(body):
+    """
+    :param body: 1-D np array with n atoms, for bodies (-1 for not a body)
+    :return:
+    """
+    body_hash = {}
+    print('Build body hash...')
+    natoms = len(body)
+    bodies = list(set(list(body)))
+    bodies.remove(-1)
+    idxes = np.arange(natoms)
+    for b in bodies:
+        body_hash[b] = idxes[body == b]
+    print('Done.')
+    return body_hash
