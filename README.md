@@ -1,4 +1,4 @@
 # yamddpp
-Yet Another MD Data Processing Program
+Yet Another MD Data Processing Program. We focus on general coarse grained models.
 
 by Shirui <shirui816@gmail.com>
