@@ -46,3 +46,5 @@ class HoomdXml(System):
         self.natoms = self.configure['natoms'][0]
         self.timestep = self.configure['time_step'][0]
         # Momentum of Inertia
+        if self.topology:
+            self._get_topo()
