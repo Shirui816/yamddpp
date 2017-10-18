@@ -27,6 +27,7 @@ class System(metaclass=ABCMeta):
         self.natoms = None
 
     def _get_topo(self):
+        self._check_params()
         self.body_hash = body_hash(self.body) if self.withbody else None
         self.bond_hash = bond_hash_dualdirect(self.bond, self.natoms)
         print("Catching Molecules...")
