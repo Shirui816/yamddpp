@@ -2,35 +2,27 @@
 # -*- coding:utf-8 -*- 
 # Author: shirui <shirui816@gmail.com>
 
-from abc import ABCMeta  # , abstractmethod
 import warnings
 from TopologicalAnalysis import grab_iter_dual, classify_isomers, bond_hash_dualdirect, body_hash
 import numpy as np
+from DataRead import HoomdXml
 
 
-class System(metaclass=ABCMeta):
-    def __init__(self, filename, topology=False, with_body=False, is_traj=False):  # don't read topology by default
-        self.filename = filename
+class System(object):
+    def __init__(self, read_object, topology=False, with_body=False):  # don't read topology by default
         self.topology = topology
-        self.withbody = with_body
-        if is_traj:
-           self.trajectory = None
-        self.position = None
-        self.type = None
-        self.velocity = None
-        self.image = None
-        self.bond = None
-        self.angle = None
-        self.dihedral = None
-        self.orientation = None
-        self.mass = None
-        self.diameter = None
-        self.body = None
-        self.natoms = None
+        self.with_body = with_body
+        self.position = read_object.position
+        self.type = read_object.type
+        self.bond = read_object.bond
+        self.diameter = read_object.diameter
+        self.body = read_object.body
+        self.natoms = read_object.natoms
+        self.trajectory = {}
 
     def _get_topo(self):
         self._check_params()
-        self.body_hash = body_hash(self.body) if self.withbody else None
+        self.body_hash = body_hash(self.body) if self.with_body else None
         self.bond_hash = bond_hash_dualdirect(self.bond, self.natoms)
         print("Catching Molecules...")
         molecular_hash = {}
@@ -67,7 +59,16 @@ class System(metaclass=ABCMeta):
     def _check_params(self):
         if self.type is None:
             raise(ValueError("No type found, I can't gathering topological information!"))
-        if (self.body is None) and self.withbody:
+        if (self.body is None) and self.with_body:
             warnings.warn("Warning, you wanted to classify molecules with body but no body data was given！")
         if self.bond is None:
             raise(ValueError("You sure you haven't got any bonds? Why would you collect molecules for monomers?"))
+
+    def add_trajectory(self, *args, **kwargs):
+        for f in args:
+            if '.xml' in f:
+                xml = HoomdXml(f, needed=kwargs['needed'])
+                self.trajectory[xml.timestep] = xml
+        if len(args) == 1:
+            if '.dcd' in args[0]:
+                pass

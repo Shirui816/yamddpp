@@ -7,19 +7,17 @@ import numpy as np
 from io import StringIO
 from xml.etree import cElementTree  # pypy will be a bit slower than python
 from pandas import read_csv
-from System import System
 
 
-class HoomdXml(System):
+class HoomdXml(object):
     @staticmethod
     def _get_attrib(dd):
         dt = eval('[' + ','.join(["('%s', int)" % key for key in dd.keys()]) + ']')
         values = [tuple(dd.values())]
         return array(values, dtype=dt)
 
-    def __init__(self, filename, topology=False, needed=None, with_body=False):
-        super(HoomdXml, self).__init__(filename=filename, topology=topology, with_body=with_body)
-        tree = cElementTree.ElementTree(file=self.filename)
+    def __init__(self, filename, needed=None):
+        tree = cElementTree.ElementTree(file=filename)
         root = tree.getroot()
         configuration = root[0]
         self.configure = self._get_attrib(configuration.attrib)
@@ -45,6 +43,3 @@ class HoomdXml(System):
         self.body = self.nodes.get('body')
         self.natoms = self.configure['natoms'][0]
         self.timestep = self.configure['time_step'][0]
-        # Momentum of Inertia
-        if self.topology:
-            self._get_topo()
