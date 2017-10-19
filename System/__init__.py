@@ -2,4 +2,4 @@
 # -*- coding:utf-8 -*- 
 # Author: shirui <shirui816@gmail.com>
 
-from ._system_frame import System
+from ._system import System

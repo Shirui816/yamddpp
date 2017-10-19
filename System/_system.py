@@ -9,10 +9,12 @@ import numpy as np
 
 
 class System(metaclass=ABCMeta):
-    def __init__(self, filename, topology=False, with_body=False):  # don't read topology by default
+    def __init__(self, filename, topology=False, with_body=False, is_traj=False):  # don't read topology by default
         self.filename = filename
         self.topology = topology
         self.withbody = with_body
+        if is_traj:
+           self.trajectory = None
         self.position = None
         self.type = None
         self.velocity = None
