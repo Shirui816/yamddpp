@@ -4,22 +4,22 @@ cimport numpy as np
 
 @cython.boundscheck(False) # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
-def to_sq(np.ndarray[double, ndim=3] sq, np.ndarray[double, ndim=2] freq, double q_max, double q_bin):
-    cdef long i, j, k, n = int(floor(q_max / q_bin))
-    cdef np.ndarray[double, ndim=1] sq = np.zeros((n,))
-    cdef np.ndarray[double, ndim=1] qs = np.zeros((n,))
+def xyz_to_r(np.ndarray[double, ndim=3] m_xyz, np.ndarray[double, ndim=2] r, double r_max, double r_bin):
+    cdef long i, j, k, n = int(floor(r_max / r_bin))
+    cdef np.ndarray[double, ndim=1] m_r = np.zeros((n,))
+    cdef np.ndarray[double, ndim=1] rs = np.zeros((n,))
     cdef np.ndarray[long, ndim=1] ct = np.zeros((n,))
-    for i in range(1, sq.shape[0]):
-        qx = freq[0, i]
-        for j in range(1, sq.shape[1]):
-            qy = freq[1, j]
-            for k in range(1, sq.shape[2]):  # Zero-freq is meaningless
-                qz = freq[2, k]
-                q = sqrt(qx * qx + qy * qy + qz * qz)
-                if q < q_max:
-                    idx = floor(q / q_bin)
-                    sq[idx] += sq[i, j, k]
-                    qs[idx] += q
+    for i in range(0, m_xyz.shape[0]):
+        x = r[0, i]
+        for j in range(0, m_xyz.shape[1]):
+            y = r[1, j]
+            for k in range(0, m_xyz.shape[2]):
+                z = r[2, k]
+                r_ = sqrt(x * x + y * y + z * z)
+                if r_ < r_max:
+                    idx = floor(r_ / r_bin)
+                    m_r[idx] += m_xyz[i, j, k]
+                    rs[idx] += r_
                     ct[idx] += 1
     ct[ct == 0] = 1
-    return qs / ct, sq / ct
+    return rs / ct, m_r / ct

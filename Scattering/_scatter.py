@@ -3,7 +3,7 @@
 # Author: shirui <shirui816@gmail.com>
 
 import numpy as np
-from .cython_ import to_sq
+from .cython_ import xyz_to_r
 
 
 def scatter(x, x_range, bins, q_bin, q_max, zero_padding=1):
@@ -23,4 +23,4 @@ def scatter(x, x_range, bins, q_bin, q_max, zero_padding=1):
     _d = box / bins
     q = np.vstack([np.fft.fftfreq(_sq.shape[_], _d[_]) for _ in range(3)])
     q = q * 2 * np.pi
-    return to_sq(_sq, q, q_max, q_bin)
+    return xyz_to_r(_sq, q, q_max, q_bin)
