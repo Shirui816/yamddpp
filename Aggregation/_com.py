@@ -20,8 +20,8 @@ def _circfuncs_common(samples, high, low):
 
 
 def _circ_mean(ang, axis=None):
-    r"""Circular mean of angles in (0, 2\pi].
-    :param ang: np.ndarray, angular values in (0, 2\pi]
+    r"""Circular mean of angles in [0, 2\pi).
+    :param ang: np.ndarray, angular values in [0, 2\pi).
     :param axis: int, about which axis
     :return: np.ndarray
     """
