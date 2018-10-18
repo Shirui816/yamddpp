@@ -42,18 +42,18 @@ def _circ_midpoint(x, _bin_size, _bins):
     return _circ_mean(_d[p > 0])
 
 
-def com(x, hi, lo, axis=None, median=False):
+def com(x, hi, lo, axis=None, midpoint=False):
     r"""Compute COM or median of PBC datas.
     :param x: np.ndarray, input coordinates.
     :param hi: np.ndarry, box.high
     :param lo: np.ndarray, box.low
     :param axis: int, mean along give axis.
-    :param median: bool, calculate mipoint or COM
+    :param midpoint: bool, calculate mipoint or COM
     :return: np.ndarray, midpoint or COM
     """
     box = hi - lo
     x_ang = _circfuncs_common(x, hi, lo)
-    if not median:
+    if not midpoint:
         ang = _circ_mean(x_ang, axis=axis)
         return ang / 2 / np.pi * box + lo
     mean_ang = np.apply_along_axis(_circ_midpoint, axis,
