@@ -25,35 +25,39 @@ def to_sq_python(s_q, freqx, freqy, freqz, qmax, qbin, sq, qs, ct):
 
 
 class Scattering(object):
-    def __init__(self, r_matrix, r_range, bins_, qbin, qmax, zero_padding=1, use_mkl=False, use_gpu=False, debug=False):
+    def __init__(self, r_matrix, r_range, bins_, q_bin, q_max,
+                 debug=False, zero_padding=1):
+        r"""
+        :param r_matrix: np.ndarray for (n_particles, n_dimension)
+        :param r_range: np.ndarray for boxsize
+        :param bins_: integer or np.ndarray for bins of boxsize
+        :param q_bin: double, binsize of q
+        :param q_max: double, maximum of q
+        :param debug: bool, debug info
+        :param zero_padding: integer or np.ndarray, 0 padding number on all demension
+        """
         fft = np.fft
-        if use_mkl and use_gpu:
-            raise (ValueError("MKL and GPU cannot be used simultaneously!"))
-        if use_mkl:  # Anaconda env, Intel-Python please modify here.
-            try:
-                import accelerate.mkl.fftpack as fft
-            except ImportError:
-                print("No MKL found, use Numpy instead!")
-                fft = np.fft
-
-        if bins_.size != r_matrix.shape[-1]:
+        if bins_.shape[0] != r_matrix.shape[-1]:
             raise (ValueError("Bins must have same dimension with positions!"))
         self.rhoMatrix, edge = np.histogramdd(r_matrix, bins=bins_, range=r_range)
         box = np.array([_[1] - _[0] for _ in r_range])
-        self.qnorm = 2 * np.pi / box / zero_padding
+        self.q_norm = 2 * np.pi / box / zero_padding
         self.d = box / bins_
-        zbins_ = (bins_ * zero_padding).astype(np.int64)
+        z_bins_ = (bins_ * zero_padding).astype(np.int64)
         r_sq = fft.rfftn(self.rhoMatrix,
-                         s=zbins_.astype(np.int64))  # using 0-padding to enhance freq-domain sampling.
-        self.SQ = np.concatenate([r_sq, r_sq.conj()[:, :, ::-1][[0] + list(range(zbins_[0] - 1, 0, -1)), :,
-                                        (zbins_[-1] + 1) % 2:-1][:, [0] + list(range(zbins_[1] - 1, 0, -1)), :]],
+                         s=z_bins_.astype(np.int64))
+        # using 0-padding to enhance freq-domain sampling.
+        self.SQ = np.concatenate([r_sq, r_sq.conj()[:, :, ::-1][[0] +
+                                  list(range(z_bins_[0] - 1, 0, -1)), :,
+                                  (z_bins_[-1] + 1) % 2:-1][:, [0] +
+                                  list(range(z_bins_[1] - 1, 0, -1)), :]],
                                  axis=-1)
         # Don't ask why. Currently only 3-D is supported here. Unless this index
         # method could be generalized.
         if debug:
-            print(np.isclose(self.SQ, fft.fftn(self.rhoMatrix, s=zbins_)).all())
-        self.qbin = qbin
-        self.qmax = qmax
+            print(np.isclose(self.SQ, fft.fftn(self.rhoMatrix, s=z_bins_)).all())
+        self.qbin = q_bin
+        self.qmax = q_max
         self.SQ = abs(self.SQ) ** 2
 
     def to_sq(self):

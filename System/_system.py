@@ -3,7 +3,7 @@
 # Author: shirui <shirui816@gmail.com>
 
 import warnings
-from TopologicalAnalysis import grab_iter_dual, classify_isomers, bond_hash_dualdirect, body_hash
+from MolecularAnalysis import grab_iter_dual, classify_isomers, bond_hash_dualdirect, body_hash
 import numpy as np
 from DataRead import HoomdXml
 
