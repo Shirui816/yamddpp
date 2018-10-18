@@ -48,8 +48,8 @@ def com(x, hi, lo, axis=None, median=False):
     :param hi: np.ndarry, box.high
     :param lo: np.ndarray, box.low
     :param axis: int, mean along give axis.
-    :param median: bool, calculate median or COM
-    :return: np.ndarray, median or COM
+    :param median: bool, calculate mipoint or COM
+    :return: np.ndarray, midpoint or COM
     """
     box = hi - lo
     x_ang = _circfuncs_common(x, hi, lo)
