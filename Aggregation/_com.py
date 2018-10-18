@@ -22,7 +22,7 @@ def _circ_mean(ang, axis=None, mass=1):
     r"""Circular mean of angles in [0, 2\pi).
     :param ang: np.ndarray, angular values in [0, 2\pi).
     :param axis: int, about which axis
-    :param mass: np.ndarry or float, mass of particles.
+    :param mass: np.ndarray or float, mass of particles.
     :return: np.ndarray
     """
     s = (mass * np.sin(ang)).sum(axis=axis)
