@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.stats import circmean
 
 _bins = 50000
 _bin_size = 2 * np.pi / _bins
