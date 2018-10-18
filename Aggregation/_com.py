@@ -18,16 +18,17 @@ def _circfuncs_common(samples, high, low):
     return (samples - low)*2.*np.pi / (high - low)
 
 
-def _circ_mean(ang, axis=None):
+def _circ_mean(ang, axis=None, mass=1):
     r"""Circular mean of angles in [0, 2\pi).
     :param ang: np.ndarray, angular values in [0, 2\pi).
     :param axis: int, about which axis
+    :param mass: np.ndarry or float, mass of particles.
     :return: np.ndarray
     """
-    s = np.sin(ang).sum(axis=axis)
-    c = np.cos(ang).sum(axis=axis)
-    res = np.arctan2(s, c)
-    return res % (2 * np.pi)
+    s = (mass * np.sin(ang)).sum(axis=axis)
+    c = (mass * np.cos(ang)).sum(axis=axis)
+    res = np.arctan2(-s, -c)
+    return res + np.pi
 
 
 def _circ_midpoint(x, _bin_size, _bins):
