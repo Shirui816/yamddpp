@@ -1,6 +1,6 @@
 import numpy as np
 
-_bins = 50000
+_bins = 500
 _bin_size = 2 * np.pi / _bins
 _d = np.linspace(0, 2*np.pi, _bins, endpoint=False)
 
