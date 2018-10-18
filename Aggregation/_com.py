@@ -49,7 +49,7 @@ def com(x, hi, lo, axis=None, mass=1, midpoint=False):
     :param lo: np.ndarray, box.low
     :param axis: int, mean along give axis.
     :param mass: np.ndarry or float, mass of particles.
-    :param midpoint: bool, calculate mipoint or COM
+    :param midpoint: bool, calculate midpoint or COM
     :return: np.ndarray, midpoint or COM
     """
     box = hi - lo
