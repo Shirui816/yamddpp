@@ -3,7 +3,7 @@
 # Author: shirui <shirui816@gmail.com>
 
 import numpy as np
-from .cython_ import xyz_to_r
+from .cython_ import hist_xyz_to_r
 
 
 def scatter(x, x_range, bins, q_bin, q_max, zero_padding=1, expand=0):
@@ -28,4 +28,4 @@ def scatter(x, x_range, bins, q_bin, q_max, zero_padding=1, expand=0):
     _sq = np.abs(_sq) ** 2
     q = np.vstack([np.fft.fftfreq(_sq.shape[_], _d[_]) for _ in range(3)])
     q = q * 2 * np.pi
-    return xyz_to_r(_sq, q, q_max, q_bin)
+    return hist_xyz_to_r(_sq, q, q_max, q_bin)

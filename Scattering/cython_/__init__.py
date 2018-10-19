@@ -2,4 +2,4 @@
 # -*- coding:utf-8 -*- 
 # Author: shirui <shirui816@gmail.com>
 
-from .functions import xyz_to_r
+from .functions import hist_xyz_to_r

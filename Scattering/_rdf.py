@@ -3,7 +3,7 @@
 # Author: shirui <shirui816@gmail.com>
 
 import numpy as np
-from .cython_ import xyz_to_r
+from .cython_ import hist_xyz_to_r
 
 
 def rdf(x, y, box, bins, r_bin=0.2, mode='ab'):
@@ -19,7 +19,7 @@ def rdf(x, y, box, bins, r_bin=0.2, mode='ab'):
     _rdf_xyz[0, 0, 0] -= 0 if mode == 'ab' else x.shape[0]
     _rdf_xyz = np.fft.fftshift(_rdf_xyz)  # for x, y are in (-box/2, box/2)
     _r = np.vstack([_[:-1] + 0.5 * (_[-1] - _[-2]) for _ in ex])
-    _rdf = xyz_to_r(_rdf_xyz, _r, box.min()/2, r_bin)
+    _rdf = hist_xyz_to_r(_rdf_xyz, _r, box.min()/2, r_bin)
     _rdf /= x.shape[0] * y.shape[0]
     _rdf *= np.multiply.reduce(bins)
     return (np.arange(_rdf.shape[0]) + 0.5) * r_bin, _rdf
