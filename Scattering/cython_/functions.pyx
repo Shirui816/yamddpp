@@ -5,7 +5,8 @@ cimport numpy as np
 @cython.boundscheck(False) # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
 def hist_xyz_to_r(np.ndarray[double, ndim=3] m_xyz, np.ndarray[double, ndim=2] r, double r_max, double r_bin):
-    cdef long i, j, k, n = int(floor(r_max / r_bin))
+    cdef long i, j, k
+    cdef long n = int(floor(r_max / r_bin))
     cdef np.ndarray[double, ndim=1] m_r = np.zeros((n,))
     cdef np.ndarray[double, ndim=1] rs = np.zeros((n,))
     cdef np.ndarray[long, ndim=1] ct = np.zeros((n,))
