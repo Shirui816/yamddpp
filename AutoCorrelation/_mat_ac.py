@@ -24,5 +24,4 @@ def mat_ac(x):
     n = x.shape[0]
     ft_x = np.fft.rfft(x, axis=0, n=n * 2)  # FFT over time axis
     ft_corr = abs(ft_x) ** 2
-    # summing over all axes except time axis.
     return np.fft.irfft(ft_corr)[:n].real / np.arange(n, 0, -1)
