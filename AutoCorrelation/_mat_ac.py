@@ -2,7 +2,7 @@ import numpy as np
 
 
 def vec_ac(x, cum=True):
-    r"""
+    r"""Vector autocorrelation function with samples.
     :param x: np.ndarray -> (n_frames, n_vectors, n_dimension)
     :param cum: bool, take average of n_vectors or not.
     :return: np.ndarray -> (n_frames,) of vector autocorrelation
@@ -17,7 +17,7 @@ def vec_ac(x, cum=True):
 
 
 def mat_ac(x):
-    r"""
+    r"""Matrix autocorrelation function.
     :param x: np.ndarray -> (n_frames, ...) of input
     :return: np.ndarray -> (n_frames, ...) of output
     """
