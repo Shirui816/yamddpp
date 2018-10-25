@@ -45,10 +45,10 @@ def _circ_midpoint(x, _bin_size, _bins):
 def com(x, hi, lo, axis=None, mass=1, midpoint=False):
     r"""Compute COM or median of PBC datas.
     :param x: np.ndarray, input coordinates.
-    :param hi: np.ndarry, box.high
+    :param hi: np.ndarray, box.high
     :param lo: np.ndarray, box.low
     :param axis: int, mean along give axis.
-    :param mass: np.ndarry or float, mass of particles.
+    :param mass: np.ndarray or float, mass of particles.
     :param midpoint: bool, calculate midpoint or COM
     :return: np.ndarray, midpoint or COM
     """
