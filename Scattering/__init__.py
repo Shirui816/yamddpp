@@ -2,5 +2,5 @@
 # -*- coding:utf-8 -*- 
 # Author: shirui <shirui816@gmail.com>
 
-from ._rdf import rdf
-from ._scatter import scatter
+from ._rdf import rdf_xy
+from ._scatter import scatter_xy
