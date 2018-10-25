@@ -14,7 +14,7 @@ def _circfuncs_common(samples, high, low):
     """
     samples = np.asarray(samples)
     if samples.size == 0:
-        return np.nan, np.nan
+        return np.nan
     return (samples - low)*2.*np.pi / (high - low)
 
 
