@@ -9,12 +9,14 @@ def vec_ac(x, cum=True):
             or (n_frames, n_vectors) if `cum=False'.
     """
     n = x.shape[0]
-    ft_x = np.fft.rfft(x, axis=0, n=n * 2)  # FFT over time axis
     summing_axes = tuple(range(1, x.ndim)) if cum else \
         tuple(range(2, x.ndim))
-    ft_corr = np.sum(abs(ft_x) ** 2, axis=summing_axes)
+    norm = np.arange(n, 0, -1)
+    if not cum:
+        norm = np.expand_dims(norm, axis=-1)
     # summing over samples and dimension or just dimension
-    return np.fft.irfft(ft_corr)[:n].real / np.arange(n, 0, -1)
+    return np.fft.irfft(np.sum(abs(np.fft.rfft(x, axis=0, n=n * 2)) ** 2,
+                               axis=summing_axes))[:n].real / norm
 
 
 def mat_ac(x):
@@ -23,6 +25,5 @@ def mat_ac(x):
     :return: np.ndarray -> (n_frames, ...) of output
     """
     n = x.shape[0]
-    ft_x = np.fft.rfft(x, axis=0, n=n * 2)  # FFT over time axis
-    ft_corr = abs(ft_x) ** 2
-    return np.fft.irfft(ft_corr)[:n].real / np.arange(n, 0, -1)
+    norm = np.arange(n, 0, -1).reshape(-1, *[1] * (x.ndim-1))
+    return np.fft.irfft(abs(np.fft.rfft(x, axis=0, n=n * 2)) ** 2)[:n].real / norm
