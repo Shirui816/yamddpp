@@ -1,15 +1,17 @@
 import numpy as np
 from ._msd import msd_square
 from simpletraj.dcd.dcd import DCDReader  # or self-made dcd reader
-from AutoCorrelation import vec_ac
 from ._msd import msd
+from ._mqd import mqd
 
 _BUFFER_SIZE = 200000000  # 2e8 coordinates for n_frames * n_particles
 
 
-def msd_dcd(dcd_file):
+def traj_dcd(dcd_file, func=msd, cum=True):
     r"""
     :param dcd_file: str, dcd_file
+    :param func: callable, msd or mqd
+    :param cum: bool
     :return: np.ndarray, msd
     """
     dcd = DCDReader(dcd_file)
@@ -19,12 +21,13 @@ def msd_dcd(dcd_file):
     n_frames = dcd.numatoms
     _BUFFER = _BUFFER_SIZE // n_frames
     n_buffer = n_samples // _BUFFER
-    ret = np.zeros((n_frames,))
+    _shape = (n_frames,) if cum else (n_frames, n_samples)
+    ret = np.zeros(_shape)
     counter = 0
     for i in range(n_buffer):
         x = np.asarray([np.copy(_[counter:counter+_BUFFER]) for _ in dcd])
         counter += _BUFFER
-        ret += (msd_square(x) - 2 * vec_ac(x, cum=True))
+        ret += func(x, cum=cum)
     x = np.asarray([np.copy(_[counter:]) for _ in dcd])
-    ret += (msd_square(x) - 2 * vec_ac(x, cum=True))
+    ret += func(x, cum=cum)
     return ret / n_samples
