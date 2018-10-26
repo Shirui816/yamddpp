@@ -22,9 +22,9 @@ def mqd(x, cum=True):
     x4 = np.square(x2).sum(axis=2)
     xt, yt, zt = x[..., 0], x[..., 1], x[..., 2]
     xt2, yt2, zt2 = x2[..., 0], x2[..., 1], x2[..., 2]
-    x2 = 2 * (xt2 * yt2 + yt2 * zt2 + zt2 * xt2)
+    x4 += 2 * (xt2 * yt2 + yt2 * zt2 + zt2 * xt2)
     if cum:
-        x4 = x4.sum(axis=1) + x2.sum(axis=1)
+        x4 = x4.sum(axis=1)
     x0 = 2 * x4.sum(axis=0)
     _shape = (n, ) if cum else (n, n_samples)
     xm = np.zeros(_shape)
@@ -40,18 +40,21 @@ def mqd(x, cum=True):
     am += 8 * np.abs(np.fft.rfft(xt * yt, axis=0, n=2 * n)) ** 2
     am += 8 * np.abs(np.fft.rfft(xt * zt, axis=0, n=2 * n)) ** 2
     am += 8 * np.abs(np.fft.rfft(yt * zt, axis=0, n=2 * n)) ** 2
-    am += -4 * _vec_cc(xt ** 3, xt)
-    am += -4 * _vec_cc(yt ** 3, yt)
-    am += -4 * _vec_cc(zt ** 3, zt)
     am += 2 * _vec_cc(xt2, yt2)
     am += 2 * _vec_cc(xt2, zt2)
     am += 2 * _vec_cc(yt2, zt2)
-    am += -4 * _vec_cc(xt2 * yt, yt)
-    am += -4 * _vec_cc(xt2 * zt, zt)
-    am += -4 * _vec_cc(xt * yt2, xt)
-    am += -4 * _vec_cc(xt * zt2, xt)
-    am += -4 * _vec_cc(yt2 * zt, zt)
-    am += -4 * _vec_cc(yt * zt2, yt)
+    _tmp = np.fft.rfft(xt, n=2*n, axis=0)
+    am += -4 * (np.fft.rfft(xt ** 3, axis=0, n=2*n).conj() * _tmp).real * 2
+    am += -4 * (np.fft.rfft(xt * yt2, axis=0, n=2*n).conj() * _tmp).real * 2
+    am += -4 * (np.fft.rfft(xt * zt2, axis=0, n=2 * n).conj() * _tmp).real * 2
+    _tmp = np.fft.rfft(yt, n=2*n, axis=0)
+    am += -4 * (np.fft.rfft(yt ** 3, axis=0, n=2*n).conj() * _tmp).real * 2
+    am += -4 * (np.fft.rfft(xt2 * yt, axis=0, n=2*n).conj() * _tmp).real * 2
+    am += -4 * (np.fft.rfft(yt * zt2, axis=0, n=2 * n).conj() * _tmp).real * 2
+    _tmp = np.fft.rfft(zt, n=2*n, axis=0)
+    am += -4 * (np.fft.rfft(zt ** 3, axis=0, n=2*n).conj() * _tmp).real * 2
+    am += -4 * (np.fft.rfft(xt2 * zt, axis=0, n=2*n).conj() * _tmp).real * 2
+    am += -4 * (np.fft.rfft(yt2 * zt, axis=0, n=2 * n).conj() * _tmp).real * 2
     if cum:
         am = am.sum(axis=1)
     else:
