@@ -25,7 +25,7 @@ def traj_dcd(dcd_file, func=msd, cum=True):
     ret = np.zeros(_shape)
     counter = 0
     for i in range(n_buffer):
-        x = np.asarray([np.copy(_[counter:counter+_BUFFER]) for _ in dcd])
+        x = np.asarray([np.copy(_[counter:counter + _BUFFER]) for _ in dcd])
         counter += _BUFFER
         ret += func(x, cum=cum)
     x = np.asarray([np.copy(_[counter:]) for _ in dcd])

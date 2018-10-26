@@ -53,7 +53,7 @@ def cu_hist_xyz_to_r_comp(m_xyz_r, m_xyz_i, r, r_max, r_bin, m_r_r, m_r_i, rs, c
 def hist_xyz_to_r(m_xyz, r, r_max, r_bin, gpu=0):
     with cuda.gpus[gpu]:
         device = cuda.get_current_device()
-        tpb = (device.WARP_SIZE, ) * 3
+        tpb = (device.WARP_SIZE,) * 3
         bpg = tuple((int(np.ceil(float(_) / __))
                      for _, __ in zip(m_xyz.shape, tpb)))
         n = int(floor(r_max / r_bin))

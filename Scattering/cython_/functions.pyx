@@ -3,7 +3,7 @@ cimport cython
 cimport numpy as np
 import numpy as np
 
-@cython.boundscheck(False) # turn off bounds-checking for entire function
+@cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
 def real_input(np.ndarray[double, ndim=3] m_xyz, np.ndarray[double, ndim=2] r, double r_max, double r_bin):
     cdef long i, j, k
@@ -26,11 +26,10 @@ def real_input(np.ndarray[double, ndim=3] m_xyz, np.ndarray[double, ndim=2] r, d
     ct[ct == 0] = 1
     return rs / ct, m_r / ct
 
-
-@cython.boundscheck(False) # turn off bounds-checking for entire function
+@cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
 def complex_input(np.ndarray[double complex, ndim=3] m_xyz, np.ndarray[double, ndim=2] r,
-                       double r_max, double r_bin):
+                  double r_max, double r_bin):
     cdef long i, j, k
     cdef long n = int(floor(r_max / r_bin))
     cdef np.ndarray[double complex, ndim=1] m_r = np.zeros((n,), dtype=np.complex128)

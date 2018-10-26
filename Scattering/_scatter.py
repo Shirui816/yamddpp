@@ -27,7 +27,7 @@ def scatter_xy(x, y, x_range, bins, q_bin, q_max, zero_padding=1, expand=0, use_
     rho_x = np.pad(rho_x, [(0, _ * __) for _, __ in zip(rho_x.shape, expand)], 'wrap')
     _rft_sq_x = np.fft.rfftn(rho_x, s=z_bins)
     _sq_x = np.concatenate([_rft_sq_x, _rft_sq_x.conj()[:, :, ::-1][-np.arange(z_bins[0]), :,
-                            (z_bins[-1] + 1) % 2:-1][:, -np.arange(z_bins[1]), :]],
+                                       (z_bins[-1] + 1) % 2:-1][:, -np.arange(z_bins[1]), :]],
                            axis=-1)
     # expand density with periodic data, enlarge sample periods.
     _sq_y = _sq_x
@@ -36,7 +36,7 @@ def scatter_xy(x, y, x_range, bins, q_bin, q_max, zero_padding=1, expand=0, use_
         rho_y = np.pad(rho_y, [(0, _ * __) for _, __ in zip(rho_y.shape, expand)], 'wrap')
         _rft_sq_y = np.fft.rfftn(rho_y, s=z_bins) if mode == 'ab' else _rft_sq_x
         _sq_y = np.concatenate([_rft_sq_y, _rft_sq_y.conj()[:, :, ::-1][-np.arange(z_bins[0]), :,
-                                (z_bins[-1] + 1) % 2:-1][:, -np.arange(z_bins[1]), :]],
+                                           (z_bins[-1] + 1) % 2:-1][:, -np.arange(z_bins[1]), :]],
                                axis=-1)
     _sq_xy = _sq_x.conj() * _sq_y
     q = np.vstack([np.fft.fftfreq(_sq_xy.shape[_], _d[_]) for _ in range(_d.shape[0])])

@@ -12,7 +12,7 @@ def msd_square(x, cum=True):
     summing_axes = (1, 2) if cum else 2
     xt = np.square(x).sum(axis=summing_axes)
     x0 = 2 * xt.sum(axis=0)
-    _shape = (n, ) if cum else (n, n_samples)
+    _shape = (n,) if cum else (n, n_samples)
     xm = np.zeros(_shape)
     xm[0] = x0 / n
     for m in range(1, n):

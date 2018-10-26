@@ -8,7 +8,7 @@ def _vec_cc(a, b):
     :return: np.ndarray
     """
     n = a.shape[0]
-    return (np.fft.rfft(a, axis=0, n=2*n).conj() * np.fft.rfft(b, axis=0, n=2*n)).real * 2
+    return (np.fft.rfft(a, axis=0, n=2 * n).conj() * np.fft.rfft(b, axis=0, n=2 * n)).real * 2
 
 
 def mqd(x, cum=True):
@@ -26,14 +26,14 @@ def mqd(x, cum=True):
     if cum:
         x4 = x4.sum(axis=1)
     x0 = 2 * x4.sum(axis=0)
-    _shape = (n, ) if cum else (n, n_samples)
+    _shape = (n,) if cum else (n, n_samples)
     xm = np.zeros(_shape)
     xm[0] = x0
     for m in range(1, n):
         x0 = x0 - x4[m - 1] - x4[n - m]
         xm[m] = x0
     norm = np.arange(n, 0, -1)
-    am = np.zeros((n+1, n_samples))
+    am = np.zeros((n + 1, n_samples))
     am += 6 * np.abs(np.fft.rfft(xt2, axis=0, n=2 * n)) ** 2
     am += 6 * np.abs(np.fft.rfft(yt2, axis=0, n=2 * n)) ** 2
     am += 6 * np.abs(np.fft.rfft(zt2, axis=0, n=2 * n)) ** 2
@@ -43,20 +43,20 @@ def mqd(x, cum=True):
     am += 2 * _vec_cc(xt2, yt2)
     am += 2 * _vec_cc(xt2, zt2)
     am += 2 * _vec_cc(yt2, zt2)
-    _tmp = np.fft.rfft(xt, n=2*n, axis=0)
-    am += -4 * (np.fft.rfft(xt ** 3, axis=0, n=2*n).conj() * _tmp).real * 2
-    am += -4 * (np.fft.rfft(xt * yt2, axis=0, n=2*n).conj() * _tmp).real * 2
+    _tmp = np.fft.rfft(xt, n=2 * n, axis=0)
+    am += -4 * (np.fft.rfft(xt ** 3, axis=0, n=2 * n).conj() * _tmp).real * 2
+    am += -4 * (np.fft.rfft(xt * yt2, axis=0, n=2 * n).conj() * _tmp).real * 2
     am += -4 * (np.fft.rfft(xt * zt2, axis=0, n=2 * n).conj() * _tmp).real * 2
-    _tmp = np.fft.rfft(yt, n=2*n, axis=0)
-    am += -4 * (np.fft.rfft(yt ** 3, axis=0, n=2*n).conj() * _tmp).real * 2
-    am += -4 * (np.fft.rfft(xt2 * yt, axis=0, n=2*n).conj() * _tmp).real * 2
+    _tmp = np.fft.rfft(yt, n=2 * n, axis=0)
+    am += -4 * (np.fft.rfft(yt ** 3, axis=0, n=2 * n).conj() * _tmp).real * 2
+    am += -4 * (np.fft.rfft(xt2 * yt, axis=0, n=2 * n).conj() * _tmp).real * 2
     am += -4 * (np.fft.rfft(yt * zt2, axis=0, n=2 * n).conj() * _tmp).real * 2
-    _tmp = np.fft.rfft(zt, n=2*n, axis=0)
-    am += -4 * (np.fft.rfft(zt ** 3, axis=0, n=2*n).conj() * _tmp).real * 2
-    am += -4 * (np.fft.rfft(xt2 * zt, axis=0, n=2*n).conj() * _tmp).real * 2
+    _tmp = np.fft.rfft(zt, n=2 * n, axis=0)
+    am += -4 * (np.fft.rfft(zt ** 3, axis=0, n=2 * n).conj() * _tmp).real * 2
+    am += -4 * (np.fft.rfft(xt2 * zt, axis=0, n=2 * n).conj() * _tmp).real * 2
     am += -4 * (np.fft.rfft(yt2 * zt, axis=0, n=2 * n).conj() * _tmp).real * 2
     if cum:
         am = am.sum(axis=1)
     else:
         norm = np.expand_dims(norm, axis=-1)
-    return (xm + np.fft.irfft(am, axis=0)[:n])/norm
+    return (xm + np.fft.irfft(am, axis=0)[:n]) / norm
