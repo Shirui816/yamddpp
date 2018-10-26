@@ -18,7 +18,7 @@ def traj_dcd(dcd_file, func=msd, cum=True):
     if dcd.periodic:
         raise ValueError("Error, periodic data found!")
     n_samples = dcd.numatoms
-    n_frames = dcd.numatoms
+    n_frames = dcd.numframes
     _BUFFER = _BUFFER_SIZE // n_frames
     n_buffer = n_samples // _BUFFER
     _shape = (n_frames,) if cum else (n_frames, n_samples)
