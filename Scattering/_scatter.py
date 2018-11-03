@@ -3,7 +3,7 @@
 # Author: shirui <shirui816@gmail.com>
 
 import numpy as np
-from .cython_ import hist_xyz_to_r
+from .c_libs import hist_xyz_to_r
 from .numba_cuda import hist_xyz_to_r as cu_hist_xyz_to_r
 
 
