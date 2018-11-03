@@ -3,6 +3,7 @@ from .self_diffusion import msd_square
 from simpletraj.dcd.dcd import DCDReader  # or self-made dcd reader
 from .self_diffusion import msd
 from .self_diffusion import mqd
+from .mutual_diffusion import cu_mutual_diffusion
 
 _BUFFER_SIZE = 200000000  # 2e8 coordinates for n_frames * n_particles
 
