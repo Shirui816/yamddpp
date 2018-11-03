@@ -3,7 +3,6 @@ cimport cython
 cimport numpy as np
 import numpy as np
 
-# Following 2 funcs need to extend to satisfy cases of any dimensions.
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
 def cell_id(np.ndarray[double, ndim=1] x, np.ndarray[double, ndim=1] box, np.ndarray[long, ndim=1] ibox):
@@ -19,26 +18,29 @@ def i_cell(np.ndarray[long, ndim=1] cid, np.ndarray[long, ndim=1] ibox):
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
 def cell_neighbours(np.ndarray[long, ndim=1] ic, np.ndarray[long, ndim=1] ibox):
-    cdef long n_dim = ibox.shape[0]
     cdef long ct = 0
-    cdef np.ndarray[long, ndim=1] ret = np.zeros(n_dim ** 3, )
-    for ind in np.ndindex((3,) * n_dim):
-        ind = np.asarray(ind) - 1
-        ret[ct] = i_cell(ind + ic, ibox)
-        ct += 1
+    cdef long i, j, k
+    cdef np.ndarray[long, ndim=1] ret = np.zeros(27, dtype=np.int64)
+    for i in range(-1, 2):
+        for j in range(-1, 2):
+            for k in range(-1, 2):
+                ind = np.asarray([i, j, k])
+                ret[ct] = i_cell(ind + ic, ibox)
+                ct += 1
     return ret
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
 def box_map(np.ndarray[double, ndim=1] box, double r_cut):
     cdef np.ndarray[long, ndim=1] ibox = np.asarray(box / r_cut, dtype=np.int64)
-    cdef long ic
-    cdef long n_dim = box.shape[0]
-    cdef np.ndarray[long, ndim=2] ret = np.zeros((np.multiply.reduce(ibox), n_dim ** 3))
-    for ind in np.ndindex(ibox):
-        ind = np.asarray(ind)
-        ic = i_cell(ind, ibox)
-        ret[ic] = cell_neighbours(ind, ibox)
+    cdef long ic, ix, iy, iz
+    cdef np.ndarray[long, ndim=2] ret = np.zeros((np.multiply.reduce(ibox), 27))
+    for ix in range(ibox[0]):
+        for iy in range(ibox[1]):
+            for iz in range(ibox[2]):
+                ind = np.asarray([ix, iy, iz])
+                ic = i_cell(ind, ibox)
+                ret[ic] = cell_neighbours(ind, ibox)
     return ret, ibox
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
