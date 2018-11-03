@@ -1,8 +1,8 @@
 import numpy as np
-from ._msd import msd_square
+from .self_diffusion import msd_square
 from simpletraj.dcd.dcd import DCDReader  # or self-made dcd reader
-from ._msd import msd
-from ._mqd import mqd
+from .self_diffusion import msd
+from .self_diffusion import mqd
 
 _BUFFER_SIZE = 200000000  # 2e8 coordinates for n_frames * n_particles
 
