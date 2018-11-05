@@ -1,5 +1,4 @@
 from numba import cuda
-from numba import jit
 import numpy as np
 from math import floor
 from math import ceil
