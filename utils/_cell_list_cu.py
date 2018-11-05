@@ -6,13 +6,15 @@ from math import ceil
 from pyculib.sorting import RadixSort
 
 
-@cuda.jit("int64(float64[:], float64[:], int64[:])", device=True)
+@cuda.jit("int64(float64[:], float64[:], uint32[:])", device=True)
 def cu_cell_id(p, box, ibox):
-    return floor((p[0] / box[0] + 0.5) * ibox[0]) + floor((p[1] / box[1] + 0.5) * ibox[1]) * ibox[0] + \
+    return floor((p[0] / box[0] + 0.5) * ibox[0]) + \
+           floor((p[1] / box[1] + 0.5) * ibox[1]) * ibox[0] + \
            floor((p[2] / box[2] + 0.5) * ibox[2]) * ibox[1] * ibox[0]
+    # +0.5 for 0 is at center of box.
 
 
-@cuda.jit("void(float64[:, :], float64[:], int64[:], int64[:]")
+@cuda.jit("void(float64[:, :], float64[:], uint32[:], uint32[:]")
 def cu_cell_ind(pos, box, ibox, ret):
     i = cuda.grid(1)
     if i < pos.shape[0]:
@@ -21,28 +23,32 @@ def cu_cell_ind(pos, box, ibox, ret):
         ret[i] = ic
 
 
-@jit
 def count(cell_id):
-    n_cell = cell_id.max()
-    ret = np.zeros(n_cell + 1)
-    for i in range(cell_id.shape[0]):
-        ret[cell_id[i] + 1] += 1
-    return np.cumsum(ret)
+    r"""
+    :param cell_id: must be sorted.
+    :return: cumsum of count of particles in cells.
+    """
+    return np.append(0, np.cumsum(np.bincount(cell_id, minlength=cell_id.max() + 1)))
 
 
 def cu_cell_list(pos, box, ibox, gpu=0):
     n = pos.shape[0]
-    sorter = RadixSort(n, np.int64)
-    cell_id = np.zeros(n).astype(np.int64)
-    cell_list = np.arange(n).astype(np.int64)
+    cell_id = np.zeros(n).astype(np.uint32)
     with cuda.gpus[gpu]:
         device = cuda.get_current_device()
         tpb = device.WARP_SIZE
         bpg = ceil(n / tpb)
         cu_cell_ind[bpg, tpb](pos, box, ibox, cell_id)
-        sorter.sort(keys=cell_id, vals=cell_list)
+        if np.multiply.reduce(ibox) > 1e6:  # using cuda if n_cell larger than 1e6.
+            cell_list = np.arange(n).astype(np.uint32)
+            sorter = RadixSort(n, np.uint32)
+            sorter.sort(keys=cell_id, vals=cell_list) # dont known why sorter with np.int64
+            # gives strange results...
+        else:
+            cell_list = np.argsort(cell_id)
+            cell_id = cell_id[cell_list]
     cell_count = count(cell_id)
-    return cell_list, cell_count
+    return cell_list.astype(np.int64), cell_count.astype(np.int64)
 
 # calling: for a particle in nth cell, cell_count[n] gives the start index of
 # cell_list, and cell_count[n+1] gives the end index of cell_list.
