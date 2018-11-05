@@ -25,7 +25,7 @@ def mat_ac(x):
     :return: np.ndarray -> (n_frames, ...) of output
     """
     n = x.shape[0]
-    norm = np.arange(n, 0, -1).reshape(-1, *[1] * (x.ndim - 1))
+    norm = np.arange(n, 0, -1).reshape(n, *[1] * (x.ndim - 1))
     return np.fft.irfft(abs(np.fft.rfft(x, axis=0, n=n * 2)) ** 2,
                         axis=0)[:n].real / norm
 
@@ -36,6 +36,6 @@ def mat_ac_comp(x):
     :return: np.ndarray -> (n_frames, ...) of output
     """
     n = x.shape[0]
-    norm = np.arange(n, 0, -1).reshape(-1, *[1] * (x.ndim - 1))
+    norm = np.arange(n, 0, -1).reshape(n, *[1] * (x.ndim - 1))
     return np.fft.ifft(abs(np.fft.fft(x, axis=0, n=n * 2)) ** 2,
                        axis=0)[:n] / norm
