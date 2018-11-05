@@ -1,9 +1,9 @@
 from numba import cuda
 from numba import jit
-from pyculib.sorting import RadixSort
 import numpy as np
 from math import floor
 from math import ceil
+from pyculib.sorting import RadixSort
 
 
 @cuda.jit("int64(float64[:], float64[:], int64[:])", device=True)
