@@ -47,11 +47,6 @@ def cu_mutual_diffusion_cum_kernel(x, ret):  # ret -> (n_frames,)
 
 
 def cu_mutual_diffusion(x, cum=True, gpu=0):
-    if not cum:
-        ret = np.zeros((x.shape[1], x.shape[0]),
-                       dtype=np.float)
-    else:
-        ret = np.zeros(x.shape[0], dtype=np.float)
     x = x.astype(np.float)
     with cuda.gpus[gpu]:
         device = cuda.get_current_device()
@@ -59,8 +54,11 @@ def cu_mutual_diffusion(x, cum=True, gpu=0):
         bpg = (math.ceil(x.shape[0] / tpb[0]),
                math.ceil(x.shape[0] / tpb[1]))
         if not cum:
+            ret = np.zeros((x.shape[1], x.shape[0]),
+                           dtype=np.float)
             cu_mutual_diffusion_kernel[bpg, tpb](x, ret)
             ret = ret.T
         else:
+            ret = np.zeros(x.shape[0], dtype=np.float)
             cu_mutual_diffusion_cum_kernel[bpg, tpb](x, ret)
     return ret  # ret -> (n_frames, n_particles) or (n_frames,)
