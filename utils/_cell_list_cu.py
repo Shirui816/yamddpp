@@ -38,7 +38,7 @@ def cu_cell_list(pos, box, ibox, gpu=0):
         tpb = device.WARP_SIZE
         bpg = ceil(n / tpb)
         cu_cell_ind[bpg, tpb](pos, box, ibox, cell_id)
-        if np.multiply.reduce(ibox) >= 1e6:  # using cuda if n_cell larger than 1e6.
+        if np.multiply.reduce(ibox) >= 2e5:  # using cuda if n_cell larger than 2e5.
             cell_list = np.arange(n).astype(np.uint32)
             sorter = RadixSort(n, np.uint32)
             sorter.sort(keys=cell_id, vals=cell_list) # dont known why sorter with np.int64
