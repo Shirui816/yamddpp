@@ -31,6 +31,7 @@ def count(cell_id):
 
 
 def cu_cell_list(pos, box, ibox, gpu=0):
+    is_sorted = False
     n = pos.shape[0]
     cell_id = np.zeros(n).astype(np.uint32)
     with cuda.gpus[gpu]:
@@ -43,9 +44,10 @@ def cu_cell_list(pos, box, ibox, gpu=0):
             sorter = RadixSort(n, np.uint32)
             sorter.sort(keys=cell_id, vals=cell_list) # dont known why sorter with np.int64
             # gives strange results...
-        else:
-            cell_list = np.argsort(cell_id)
-            cell_id = cell_id[cell_list]
+            is_sorted = True
+    if not is_sorted:
+        cell_list = np.argsort(cell_id)
+        cell_id = cell_id[cell_list]
     cell_count = count(cell_id)
     return cell_list.astype(np.int64), cell_count.astype(np.int64)
 
