@@ -28,8 +28,8 @@ def cu_hist_xyz_to_r_real(m_xyz, r, r_max, r_bin, m_r, rs, ct):
         cuda.atomic.add(ct, idx, 1.0)
 
 
-@cuda.jit("void(float32[:,:,:], float32[:,:,:], float32[:, :], float64, float64, float32[:], float32[:], float32[:], "
-          "float32[:])")
+@cuda.jit("void(float32[:,:,:], float32[:,:,:], float32[:, :], float64, float64, float32[:],"
+          "float32[:], float32[:], float32[:])")
 def cu_hist_xyz_to_r_comp(m_xyz_r, m_xyz_i, r, r_max, r_bin, m_r_r, m_r_i, rs, ct):
     i, j, k = cuda.grid(3)
     if i >= m_xyz_r.shape[0]:
@@ -66,7 +66,8 @@ def hist_xyz_to_r(m_xyz, r, r_max, r_bin, gpu=0):
             m_r_i = np.zeros((n,), dtype=np.float32)
             cu_hist_xyz_to_r_comp[bpg, tpb](m_xyz.real.astype(np.float32),
                                             m_xyz.imag.astype(np.float32),
-                                            r, r_max, r_bin, m_r, m_r_i, rs, ct)
+                                            r.astype(np.float32), r_max,
+                                            r_bin, m_r, m_r_i, rs, ct)
             m_r = m_r + 1j * m_r_i
     ct[ct == 0] = 1
     return rs / ct, m_r / ct
