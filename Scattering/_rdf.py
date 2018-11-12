@@ -27,7 +27,8 @@ def rdf_xy(x, y, x_range, bins, r_bin=0.2, use_gpu=False):
     if use_gpu is False:
         _rdf = hist_xyz_to_r(_rdf_xyz, _r, box.min() / 2, r_bin)
     else:
-        _rdf = cu_hist_xyz_to_r(_rdf_xyz, _r, box.min() / 2, r_bin, gpu=use_gpu)
+        _rdf = cu_hist_xyz_to_r(_rdf_xyz.astype(np.float32),
+                                _r, box.min() / 2, r_bin, gpu=use_gpu)
     _rdf /= x.shape[0] * y.shape[0]
     _rdf *= np.multiply.reduce(bins)
     return (np.arange(_rdf.shape[0]) + 0.5) * r_bin, _rdf
