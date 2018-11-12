@@ -61,7 +61,8 @@ def hist_xyz_to_r(m_xyz, r, r_max, r_bin, gpu=0):
         rs = np.zeros((n,), dtype=np.float32)
         ct = np.zeros((n,), dtype=np.float32)
         if m_xyz.dtype == np.float32:
-            cu_hist_xyz_to_r_real[bpg, tpb](m_xyz, r, r_max, r_bin, m_r, rs, ct)
+            cu_hist_xyz_to_r_real[bpg, tpb](m_xyz.astype(np.float32), r.astype(np.float32),
+                                            r_max, r_bin, m_r, rs, ct)
         else:
             m_r_i = np.zeros((n,), dtype=np.float32)
             cu_hist_xyz_to_r_comp[bpg, tpb](m_xyz.real.astype(np.float32),

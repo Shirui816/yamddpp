@@ -43,4 +43,4 @@ def scatter_xy(x, y, x_range, bins, q_bin, q_max, zero_padding=1, expand=0, use_
     q = q * 2 * np.pi
     if use_gpu is False:
         return hist_xyz_to_r(_sq_xy, q, q_max, q_bin)
-    return cu_hist_xyz_to_r(_sq_xy, q.astype(np.float32), q_max, q_bin, gpu=use_gpu)
+    return cu_hist_xyz_to_r(_sq_xy, q, q_max, q_bin, gpu=use_gpu)
