@@ -59,4 +59,4 @@ def mqd(x, cum=True):
         am = am.sum(axis=1)
     else:
         norm = np.expand_dims(norm, axis=-1)
-    return (xm + np.fft.irfft(am, axis=0)[:n]) / norm
+    return (xm + np.fft.irfft(am, axis=0, n=n * 2)[:n]) / norm
