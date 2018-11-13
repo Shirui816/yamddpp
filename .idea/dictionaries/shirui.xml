@@ -4,8 +4,11 @@
       <w>autocorrelation</w>
       <w>circ</w>
       <w>circfuncs</w>
+      <w>cuda</w>
+      <w>cumsum</w>
       <w>datas</w>
       <w>ibox</w>
+      <w>ifft</w>
       <w>ndarray</w>
       <w>ndarry</w>
       <w>shirui</w>

@@ -8,6 +8,11 @@ def vec_ac(x, cum=True):
     :return: np.ndarray -> (n_frames,) of vector autocorrelation
             or (n_frames, n_vectors) if `cum=False'.
     """
+    fft = np.fft.rfft
+    ifft = np.fft.irfft
+    if 'complex' in x.dtype.name:
+        fft = np.fft.fft
+        ifft = np.fft.ifft
     n = x.shape[0]
     summing_axes = tuple(range(1, x.ndim)) if cum else \
         tuple(range(2, x.ndim))
@@ -15,8 +20,8 @@ def vec_ac(x, cum=True):
     if not cum:
         norm = np.expand_dims(norm, axis=-1)
     # summing over samples and dimension or just dimension
-    return np.fft.irfft(np.sum(abs(np.fft.rfft(x, axis=0, n=n * 2)) ** 2,
-                               axis=summing_axes))[:n].real / norm
+    return ifft(np.sum(abs(fft(x, axis=0, n=n * 2)) ** 2,
+                       axis=summing_axes))[:n].real / norm
 
 
 def mat_ac(x):
@@ -25,9 +30,14 @@ def mat_ac(x):
     :return: np.ndarray -> (n_frames, ...) of output
     """
     n = x.shape[0]
+    fft = np.fft.rfft
+    ifft = np.fft.irfft
+    if 'complex' in x.dtype.name:
+        fft = np.fft.fft
+        ifft = np.fft.ifft
     norm = np.arange(n, 0, -1).reshape(n, *[1] * (x.ndim - 1))
-    return np.fft.irfft(abs(np.fft.rfft(x, axis=0, n=n * 2)) ** 2,
-                        axis=0)[:n].real / norm
+    return ifft(abs(fft(x, axis=0, n=n * 2)) ** 2,
+                axis=0)[:n].real / norm
 
 
 def mat_ac_comp(x):
