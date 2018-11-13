@@ -18,4 +18,4 @@ def norm_vec_to_r(x, r, r_bin, r_max):
     cter[cter == 0] = 1
     return ret / cter
 
-# for datas of all dimensions. x.shape == r.shape == (500, 500, 500), ~ 2.05s
+# for datas of all dimensions. x.shape == (500, 500, 500), r.shape == (3, 500). ~ 2.05s
