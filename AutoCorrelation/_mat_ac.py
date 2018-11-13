@@ -38,14 +38,3 @@ def mat_ac(x):
     norm = np.arange(n, 0, -1).reshape(n, *[1] * (x.ndim - 1))
     return ifft(abs(fft(x, axis=0, n=n * 2)) ** 2,
                 axis=0)[:n].real / norm
-
-
-def mat_ac_comp(x):
-    r"""Matrix autocorrelation function.
-    :param x: np.ndarray -> (n_frames, ...) of input
-    :return: np.ndarray -> (n_frames, ...) of output
-    """
-    n = x.shape[0]
-    norm = np.arange(n, 0, -1).reshape(n, *[1] * (x.ndim - 1))
-    return np.fft.ifft(abs(np.fft.fft(x, axis=0, n=n * 2)) ** 2,
-                       axis=0)[:n] / norm
