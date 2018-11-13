@@ -29,12 +29,12 @@ def mat_ac(x):
     :param x: np.ndarray -> (n_frames, ...) of input
     :return: np.ndarray -> (n_frames, ...) of output
     """
-    n = x.shape[0]
     fft = np.fft.rfft
     ifft = np.fft.irfft
     if 'complex' in x.dtype.name:
         fft = np.fft.fft
         ifft = np.fft.ifft
+    n = x.shape[0]
     norm = np.arange(n, 0, -1).reshape(n, *[1] * (x.ndim - 1))
     return ifft(abs(fft(x, axis=0, n=n * 2)) ** 2,
                 axis=0)[:n].real / norm
