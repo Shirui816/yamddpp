@@ -21,7 +21,7 @@ def vec_ac(x, cum=True):
         norm = np.expand_dims(norm, axis=-1)
     # summing over samples and dimension or just dimension
     return ifft(np.sum(abs(fft(x, axis=0, n=n * 2)) ** 2,
-                       axis=summing_axes), n=n * 2)[:n].real / norm
+                       axis=summing_axes), axis=0, n=n * 2)[:n].real / norm
 
 
 def mat_ac(x):
