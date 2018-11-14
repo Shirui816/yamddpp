@@ -13,6 +13,7 @@ def i_cell(cid, ibox):
     ind = np.asarray((cid + ibox) % ibox, dtype=np.int64)
     return ind[0] + ind[1] * ibox[0] + ind[2] * ibox[1] * ibox[0]
 
+# TODO: all-dimension support for above 2 funcs.
 
 @jit
 def cell_neighbours(ic, ibox):
