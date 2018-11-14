@@ -18,8 +18,8 @@ def i_cell(cid, ibox):
 def cell_neighbours(ic, ibox):
     ret = np.zeros(3 ** ibox.shape[0], dtype=np.int64)
     ct = 0
-    for idx in np.ndindex((3,) * ibox.shape[0]):
-        ind = np.asarray(idx) - 1
+    for ind in np.ndindex((3,) * ibox.shape[0]):
+        ind = np.asarray(ind) - 1
         ret[ct] = i_cell(ind + ic, ibox)
         ct += 1
     return ret
@@ -29,8 +29,8 @@ def cell_neighbours(ic, ibox):
 def box_map(box, r_cut):
     ibox = np.asarray(box / r_cut, dtype=np.int64)
     ret = np.zeros((np.multiply.reduce(ibox), 3 ** box.shape[0]))
-    for idx in np.ndindex(ibox):
-        ind = np.asarray(idx)
+    for ind in np.ndindex(ibox):
+        ind = np.asarray(ind)
         ic = i_cell(ind, ibox)
         ret[ic] = cell_neighbours(ind, ibox)
     return ret, ibox
