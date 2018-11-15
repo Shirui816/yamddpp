@@ -8,6 +8,15 @@ from utils import norm_vec_to_r
 
 
 def rdf_xy(x, y, x_range, bins, r_bin=0.2, use_gpu=False):
+    r"""Calculate RDF by FFT.
+    :param x: np.ndarray, coordinates of component 1
+    :param y: np.ndarray, coordinates of component 2
+    :param x_range: np.ndarray, range of positions
+    :param bins: np.ndarray or int, bins in calculation of density matrix
+    :param r_bin: double, bin size of r
+    :param use_gpu: bool or int, use gpu code to summing vector g(R) to g(r)
+    :return: tuple of r and g(r)
+    """
     if not (isinstance(use_gpu, bool) or isinstance(use_gpu, int)):
         raise ValueError("`use_gpu' should be bool or int!")
     mode = 'ab' if x is not y else 'aa'

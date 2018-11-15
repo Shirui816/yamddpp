@@ -8,6 +8,18 @@ from utils import norm_vec_to_r
 
 
 def scatter_xy(x, y, x_range, bins, q_bin, q_max, zero_padding=1, expand=0, use_gpu=False):
+    r"""Calculate static structure factor.
+    :param x: np.ndarray, coordinates of component 1
+    :param y: np.ndarray, coordinates of component 2
+    :param x_range: np.ndarray, range of positions
+    :param bins: np.ndarray or int, bins in calculation of density matrix
+    :param q_bin: double, bin size of wave vector q
+    :param q_max: double, max value of wave vector q
+    :param zero_padding: int (periods), whether pad density matrix with 0
+    :param expand: int or np.ndarray (periods), extend density matrix by its period
+    :param use_gpu: bool or int, use gpu code to summing vector S(Q) to S(q)
+    :return: np.ndarray, S(q) value
+    """
     mode = 'ab' if x is not y else 'aa'
     bins = np.asarray(bins)
     x_range = np.asarray(x_range)
