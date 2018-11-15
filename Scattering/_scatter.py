@@ -3,8 +3,8 @@
 # Author: shirui <shirui816@gmail.com>
 
 import numpy as np
-from .c_libs import hist_xyz_to_r
-from .numba_cuda import hist_xyz_to_r as cu_hist_xyz_to_r
+from utils import norm_to_vec_cu
+from utils import norm_vec_to_r
 
 
 def scatter_xy(x, y, x_range, bins, q_bin, q_max, zero_padding=1, expand=0, use_gpu=False):
@@ -42,5 +42,5 @@ def scatter_xy(x, y, x_range, bins, q_bin, q_max, zero_padding=1, expand=0, use_
     q = np.vstack([np.fft.fftfreq(_sq_xy.shape[_], _d[_]) for _ in range(_d.shape[0])])
     q = q * 2 * np.pi
     if use_gpu is False:
-        return hist_xyz_to_r(_sq_xy, q, q_max, q_bin)
-    return cu_hist_xyz_to_r(_sq_xy, q, q_max, q_bin, gpu=use_gpu)
+        return norm_vec_to_r(_sq_xy, q, q_bin, q_max)
+    return norm_to_vec_cu(_sq_xy, q, q_bin, q_max, gpu=use_gpu)

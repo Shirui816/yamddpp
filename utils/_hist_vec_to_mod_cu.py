@@ -4,7 +4,7 @@ import numba as nb
 
 
 @cuda.jit("void(int64, int64[:], int64[:])", device=True)
-def unravel_index_f_cu(i, dim, ret):
+def unravel_index_f_cu(i, dim, ret):  # unravel index in Fortran way.
     for k in range(dim.shape[0]):
         ret[k] = int(i % dim[k])
         i = (i - ret[k]) / dim[k]
@@ -70,6 +70,14 @@ def _cu_kernel_complex(x, y, r, r_bin, r_max2, ret_real, ret_imag, cter):
 
 
 def norm_to_vec_cu(x, r, r_bin, r_max, gpu=0):
+    r"""
+    :param x: np.ndarray, input
+    :param r: np.ndarray[ndim=2], x[dim_1, dim_2, ..., dim_n] ~ (r[1, dim_1(i)], r[2, dim_2(j), ...)
+    :param r_bin: double, bin size of r
+    :param r_max: double, max of r
+    :param gpu: int gpu number
+    :return: np.ndarray, averaged $F(x, y, ...) -> f(\sqrt{x^2+y^2+...})$
+    """
     r_max2 = r_max ** 2
     ret = np.zeros(int(r_max / r_bin) + 1, dtype=np.float)
     cter = np.zeros(ret.shape, dtype=np.uint32)

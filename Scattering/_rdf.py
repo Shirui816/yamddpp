@@ -3,8 +3,8 @@
 # Author: shirui <shirui816@gmail.com>
 
 import numpy as np
-from .c_libs import hist_xyz_to_r
-from .numba_cuda import hist_xyz_to_r as cu_hist_xyz_to_r
+from utils import norm_to_vec_cu
+from utils import norm_vec_to_r
 
 
 def rdf_xy(x, y, x_range, bins, r_bin=0.2, use_gpu=False):
@@ -25,10 +25,10 @@ def rdf_xy(x, y, x_range, bins, r_bin=0.2, use_gpu=False):
     _rdf_xyz = np.fft.fftshift(_rdf_xyz)  # for x, y are in (-box/2, box/2)
     _r = np.vstack([_[:-1] + 0.5 * (_[-1] - _[-2]) for _ in ex])
     if use_gpu is False:
-        _rdf = hist_xyz_to_r(_rdf_xyz, _r, box.min() / 2, r_bin)
+        _rdf = norm_vec_to_r(_rdf_xyz, _r, r_bin, box.min() / 2)
     else:
-        _rdf = cu_hist_xyz_to_r(_rdf_xyz, _r, box.min() / 2,
-                                r_bin, gpu=use_gpu)
+        _rdf = norm_to_vec_cu(_rdf_xyz, _r, r_bin, box.min() / 2,
+                              gpu=use_gpu)
     _rdf /= x.shape[0] * y.shape[0]
     _rdf *= np.multiply.reduce(bins)
     return (np.arange(_rdf.shape[0]) + 0.5) * r_bin, _rdf
