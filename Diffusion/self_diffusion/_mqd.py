@@ -2,7 +2,7 @@ import numpy as np
 
 
 def _vec_cc(a, b):
-    r"""FT{a \star b + b \star a}
+    r"""$FT{a \star b + b \star a}$
     :param a: np.ndarray, a
     :param b: np.ndarray, b
     :return: np.ndarray

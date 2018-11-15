@@ -9,7 +9,7 @@ _BUFFER_SIZE = 200000000  # 2e8 coordinates for n_frames * n_particles
 
 
 def traj_dcd(dcd_file, func=msd, cum=True):
-    r"""
+    r"""Example of dcd input.
     :param dcd_file: str, dcd_file
     :param func: callable, msd or mqd
     :param cum: bool
