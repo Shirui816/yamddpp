@@ -1,0 +1,86 @@
+from numba import cuda
+import numpy as np
+import numba as nb
+
+
+@cuda.jit("void(int64, int64[:], int64[:])", device=True)
+def unravel_index_f_cu(i, dim, ret):
+    for k in range(dim.shape[0]):
+        ret[k] = int(i % dim[k])
+        i = (i - ret[k]) / dim[k]
+
+
+def unravel_indices_f(dim, gpu=0):
+    n_dim = dim.shape[0]
+    n = np.multiply.reduce(dim)
+    ret = np.zeros((n, n_dim), dtype=np.int64)
+    dim = np.asarray(dim, dtype=np.int64)
+
+    @cuda.jit("void(int64[:], int64, int64[:,:])")
+    def unravel_indices_f_cu(_dim, _n, _ret):
+        i = cuda.grid(1)
+        tmp = cuda.local.array(n_dim, nb.int64)  # n_dim must be constant in this def.
+        # private array for every thread.
+        if i < n:
+            unravel_index_f_cu(i, _dim, tmp)
+            for j in range(tmp.shape[0]):
+                _ret[i, j] = tmp[j]
+
+    with cuda.gpus[gpu]:
+        device = cuda.get_current_device()
+        tpb = device.WARP_SIZE
+        bpg = int(np.ceil(n / tpb))
+        unravel_indices_f_cu[bpg, tpb](dim, n, ret)
+    return ret
+
+
+@cuda.jit("void(float64[:], float64[:,:], float64, float64, float64[:], uint32[:])")
+def _cu_kernel(x, r, r_bin, r_max2, ret, cter):
+    i = cuda.grid(1)
+    if i >= x.shape[0]:
+        return
+    tmp = 0
+    j = i
+    for k in range(r.shape[0]):  # r.shape == (n-dim, n-coordinates in each dim)
+        idx = int(j % r.shape[1])
+        j = (j - idx) / r.shape[1]
+        tmp += r[k, idx] ** 2
+    if tmp < r_max2:
+        jdx = int(tmp ** 0.5 / r_bin)
+        cuda.atomic.add(ret, jdx, x[i])
+        cuda.atomic.add(cter, jdx, 1)
+
+
+@cuda.jit("void(float64[:], float64[:,:], float64, float64, float64[:], float64[:], uint32[:])")
+def _cu_kernel_complex(x, y, r, r_bin, r_max2, ret_real, ret_imag, cter):
+    i = cuda.grid(1)
+    if i >= x.shape[0]:
+        return
+    tmp = 0
+    j = i
+    for k in range(r.shape[0]):  # r.shape == (n-dim, n-elements on each dim)
+        idx = int(j % r.shape[1])
+        j = (j - idx) / r.shape[1]
+        tmp += r[k, idx] ** 2
+    if tmp < r_max2:
+        jdx = int(tmp ** 0.5 / r_bin)
+        cuda.atomic.add(ret_real, jdx, x[i])
+        cuda.atomic.add(ret_imag, jdx, y[i])
+        cuda.atomic.add(cter, jdx, 1)
+
+
+def norm_to_vec_cu(x, r, r_bin, r_max, gpu=0):
+    r_max2 = r_max ** 2
+    ret = np.zeros(int(r_max / r_bin) + 1, dtype=np.float)
+    cter = np.zeros(ret.shape, dtype=np.uint32)
+    x = x.ravel(order='F')
+    with cuda.gpus[gpu]:
+        device = cuda.get_current_device()
+        tpb = device.WARP_SIZE
+        bpg = int(np.ceil(x.shape[0] / tpb))
+        if 'complex' in x.dtype.name:
+            _cu_kernel_complex[bpg, tpb](x.real, x.imag, r, r_bin, r_max2, ret, cter)
+        else:
+            _cu_kernel[bpg, tpb](x, r, r_bin, r_max2, ret, cter)
+    cter[cter == 0] = 1
+    return ret / cter
