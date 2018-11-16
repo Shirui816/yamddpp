@@ -9,7 +9,7 @@ def cell_id(x, box, ibox):
 
 
 @jit
-def i_cell(cid, ibox):
+def i_cell(cid, ibox):  # ravel in Fortran way.
     ind = np.asarray((cid + ibox) % ibox, dtype=np.int64)
     return ind[0] + ind[1] * ibox[0] + ind[2] * ibox[1] * ibox[0]
 
