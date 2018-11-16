@@ -18,11 +18,10 @@ def i_cell(cid, ibox):
 @jit
 def cell_neighbours(ic, ibox):
     ret = np.zeros(3 ** ibox.shape[0], dtype=np.int64)
-    ct = 0
-    for ind in np.ndindex((3,) * ibox.shape[0]):  # iterator of unraveled n-dimensional indices.
+    for i, ind in enumerate(np.ndindex((3,) * ibox.shape[0])):
+        # iterator of unraveled n-dimensional indices.
         ind = np.asarray(ind) - 1
-        ret[ct] = i_cell(ind + ic, ibox)
-        ct += 1
+        ret[i] = i_cell(ind + ic, ibox)
     return ret
 
 
