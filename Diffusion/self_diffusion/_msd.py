@@ -1,5 +1,5 @@
 import numpy as np
-from Correlation import vec_ac
+from TimeCorrelation import vec_ac
 
 
 def msd_square(x, cum=True):
