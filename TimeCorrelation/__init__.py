@@ -62,7 +62,7 @@ def cross_correlate(in1, in2, axis=0):
     applied on in2 here. Or generally,
     ifft(fft(a, n=na+nb-1) * fft(b, n=na+nb-1).conj())[:na] ==
     np.correlate(a, b, 'full')[nb-1:] for na >= nb... See `same' and valid mode
-    in scipy.fft.convolve.
+    in `scipy.fft.convolve' (`_centered' function).
 
     >>> a = np.random.random(10)
     >>> b = np.random.random(10)
