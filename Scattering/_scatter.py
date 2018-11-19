@@ -24,10 +24,12 @@ def scatter_xy(x, y, x_range, bins, q_bin, q_max, zero_padding=1, expand=0, use_
     bins = np.asarray(bins)
     x_range = np.asarray(x_range)
     expand = np.asarray(expand)
-    if x.shape[1] != 3:
-        raise ValueError("3D coordinates are currently supported only!")
+    n_dim = x.shape[1]
+    if x_range.shape[0] != n_dim:
+        raise ValueError("Dimension of coordinates is %d and"
+                         "dimension of x_range is %d" % (n_dim, x_range.shape[0]))
     if bins.ndim < 1:
-        bins = np.asarray([bins] * 3)
+        bins = np.asarray([bins] * n_dim)
     if not (isinstance(use_gpu, bool) or isinstance(use_gpu, int)):
         raise ValueError("`use_gpu' should be bool or int!")
     rho_x, edge = np.histogramdd(x, bins=bins, range=x_range)
@@ -45,12 +47,20 @@ def scatter_xy(x, y, x_range, bins, q_bin, q_max, zero_padding=1, expand=0, use_
         rho_y = np.pad(rho_y, [(0, _ * __) for _, __ in zip(rho_y.shape, expand)], 'wrap')
         _rft_sq_y = np.fft.rfftn(rho_y, s=z_bins)
     _rft_sq_xy = _rft_sq_x.conj() * _rft_sq_y  # circular correlation.
-    _sq_xy = np.concatenate([_rft_sq_xy,
-                             _rft_sq_xy.conj()
-                             [:, :, ::-1]
-                             [-np.arange(z_bins[0]), :, (z_bins[-1] + 1) % 2:-1]
-                             [:, -np.arange(z_bins[1]), :]],
-                            axis=-1)
+
+    # _sq_xy = np.concatenate([_rft_sq_xy,
+    #                          _rft_sq_xy.conj()
+    #                          [:, :, ::-1]
+    #                          [-np.arange(z_bins[0]), :, (z_bins[-1] + 1) % 2:-1]
+    #                          [:, -np.arange(z_bins[1]), :]],
+    #                         axis=-1)
+
+    fslice = tuple([slice(0, _) for _ in z_bins])
+    lslice = np.arange(z_bins[-1] - z_bins[-1] // 2 - 1, 0, -1)
+    pad_axes = [(0, 1)] * (z_bins.shape[0] - 1) + [(0, 0)]
+    flip_axes = tuple(range(z_bins.shape[0] - 1))
+    _sq_xy = np.concatenate([_rft_sq_xy, np.flip(np.pad(_rft_sq_xy.conj(), pad_axes, 'wrap'),
+                                                 axis=flip_axes)[fslice][..., lslice]], axis=-1)
     q = np.vstack([np.fft.fftfreq(_sq_xy.shape[_], _d[_]) for _ in range(_d.shape[0])])
     q = q * 2 * np.pi
     if use_gpu is False:
