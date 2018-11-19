@@ -34,11 +34,11 @@ def next_regular(target):
                 # Fallback for Python <2.7
                 p2 = 2 ** (len(bin(quotient - 1)) - 2)
 
-            N = p2 * p35
-            if N == target:
-                return N
-            elif N < match:
-                match = N
+            n = p2 * p35
+            if n == target:
+                return n
+            elif n < match:
+                match = n
             p35 *= 3
             if p35 == target:
                 return p35
