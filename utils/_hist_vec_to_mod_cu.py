@@ -86,7 +86,7 @@ def norm_to_vec_cu(x, r, r_bin, r_max, gpu=0):
         device = cuda.get_current_device()
         tpb = device.WARP_SIZE
         bpg = int(np.ceil(x.shape[0] / tpb))
-        if 'complex' in x.dtype.name:
+        if np.issubdtype(x.dtype, np.complex):
             _cu_kernel_complex[bpg, tpb](x.real, x.imag, r, r_bin, r_max2, ret, cter)
         else:
             _cu_kernel[bpg, tpb](x, r, r_bin, r_max2, ret, cter)
