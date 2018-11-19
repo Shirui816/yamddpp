@@ -11,6 +11,7 @@ def cu_cell_id(p, box, ibox):
            floor((p[1] / box[1] + 0.5) * ibox[1]) * ibox[0] + \
            floor((p[2] / box[2] + 0.5) * ibox[2]) * ibox[1] * ibox[0]
     # +0.5 for 0 is at center of box.
+    # unravel in Fortran way.
 
 
 @cuda.jit("void(float64[:, :], float64[:], uint32[:], uint32[:]")
@@ -56,3 +57,4 @@ def cu_cell_list(pos, box, ibox, gpu=0):
 # = number_of_particles_of_all_(0, i)th_cell. For cell_list is sorted by cell_ids:
 # cell_list = [pid_in_0th_cell, pid_in_0th_cell, ..., pid_in_nth_cell]
 # cell_list[number_of_particles_of_all_(0, i-1)th_cell] = 1st_pid_in_ith_cell
+# algorithm: http://developer.download.nvidia.com/GTC/PDF/2062_Wang.pdf
