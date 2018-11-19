@@ -3,13 +3,13 @@ import numpy as np
 
 
 @jit
-def cell_id(x, box, ibox):
+def cell_id(x: np.ndarray, box: np.ndarray, ibox: np.ndarray) -> int:
     ind = np.asarray(((x / box + 0.5) * ibox), dtype=np.int64)
     return ind[0] + ind[1] * ibox[0] + ind[2] * ibox[1] * ibox[0]
 
 
 @jit
-def i_cell(cid, ibox):  # ravel in Fortran way.
+def i_cell(cid: np.ndarray, ibox: np.ndarray) -> int:  # ravel in Fortran way.
     ind = np.asarray((cid + ibox) % ibox, dtype=np.int64)
     return ind[0] + ind[1] * ibox[0] + ind[2] * ibox[1] * ibox[0]
 
@@ -18,7 +18,7 @@ def i_cell(cid, ibox):  # ravel in Fortran way.
 
 
 @jit
-def cell_neighbours(ic, ibox):
+def cell_neighbours(ic: np.ndarray, ibox: np.ndarray) -> np.ndarray:
     ret = np.zeros(3 ** ibox.shape[0], dtype=np.int64)
     for i, ind in enumerate(np.ndindex((3,) * ibox.shape[0])):
         # iterator of unraveled n-dimensional indices.
@@ -28,7 +28,7 @@ def cell_neighbours(ic, ibox):
 
 
 @jit
-def box_map(box, r_cut):
+def box_map(box: np.ndarray, r_cut: "np.ndarray or float") -> tuple:
     ibox = np.asarray(box / r_cut, dtype=np.int64)
     ret = np.zeros((np.multiply.reduce(ibox), 3 ** box.shape[0]))
     for ind in np.ndindex(ibox):
@@ -39,7 +39,7 @@ def box_map(box, r_cut):
 
 
 @jit
-def linked_cl(pos, box, ibox):
+def linked_cl(pos: np.ndarray, box: np.ndarray, ibox: np.ndarray) -> tuple:
     head = np.zeros(np.multiply.reduce(ibox), dtype=np.int64) - 1
     body = np.zeros(pos.shape[0], dtype=np.int64)
     for i in range(pos.shape[0]):
