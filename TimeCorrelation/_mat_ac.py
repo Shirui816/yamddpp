@@ -40,4 +40,4 @@ def mat_ac(x):
     s = next_regular(2 * n)  # 2 * n - 1 is fine.
     norm = np.arange(n, 0, -1).reshape(n, *[1] * (x.ndim - 1))
     return ifft(abs(fft(x, axis=0, n=s)) ** 2,
-                axis=0, n=s)[:x.shape[0]].real / norm
+                axis=0, n=s)[:n].real / norm
