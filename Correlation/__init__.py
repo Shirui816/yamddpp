@@ -1,6 +1,6 @@
 from ._mat_ac import vec_ac
 from ._mat_ac import mat_ac
-from scipy.signal import fftconvolve
+import numpy as np
 
 
 def _next_regular(target):
@@ -52,5 +52,24 @@ def _next_regular(target):
     return match
 
 
-def cross_correlate(in1, in2):
-    return fftconvolve(in1, in2[::-1].conj(), 'full')
+def cross_correlate(in1, in2, axis=0):
+    r"""Cross-correlation of matrices along given axis.
+    Usually used in time-correlation, axis is enough.
+    :param in1: np.ndarray
+    :param in2: np.ndarray
+    :param axis: int
+    :return: `full' mode of np.correlate result.
+    """
+    fft = np.fft.rfft
+    ifft = np.fft.irfft
+    if (np.issubdtype(in1.dtype, np.complex) or
+            np.issubdtype(in2.dtype, np.complex)):
+        fft = np.fft.fft
+        ifft = np.fft.ifft
+    s1 = in1.shape[axis]
+    s2 = in2.shape[axis]
+    s = s1 + s2 - 1
+    f = _next_regular(s)
+    return ifft(fft(in1, axis=axis, n=f) *
+                fft(np.flip(in2, axis=axis).conj(), axis=axis, n=f),
+                axis=axis, n=f)[:s]

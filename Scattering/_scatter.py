@@ -44,7 +44,7 @@ def scatter_xy(x, y, x_range, bins, q_bin, q_max, zero_padding=1, expand=0, use_
         rho_y, edge = np.histogramdd(y, bins=bins, range=x_range)
         rho_y = np.pad(rho_y, [(0, _ * __) for _, __ in zip(rho_y.shape, expand)], 'wrap')
         _rft_sq_y = np.fft.rfftn(rho_y, s=z_bins)
-    _rft_sq_xy = _rft_sq_x.conj() * _rft_sq_y
+    _rft_sq_xy = _rft_sq_x.conj() * _rft_sq_y  # circular correlation.
     _sq_xy = np.concatenate([_rft_sq_xy,
                              _rft_sq_xy.conj()
                              [:, :, ::-1]
