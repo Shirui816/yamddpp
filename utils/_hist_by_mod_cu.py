@@ -69,7 +69,7 @@ def _cu_kernel_complex(x, y, r, r_bin, r_max2, ret_real, ret_imag, cter):
         cuda.atomic.add(cter, jdx, 1)
 
 
-def norm_to_vec_cu(x, r, r_bin, r_max, gpu=0):
+def hist_vec_by_r_cu(x, r, r_bin, r_max, gpu=0):
     r"""
     :param x: np.ndarray, input
     :param r: np.ndarray[ndim=2], x[dim_1, dim_2, ..., dim_n] ~ (r[1, dim_1(i)], r[2, dim_2(j), ...)

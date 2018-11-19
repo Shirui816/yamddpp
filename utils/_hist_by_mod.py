@@ -3,7 +3,7 @@ import numpy as np
 
 
 @jit
-def norm_vec_to_r(x, r, r_bin, r_max):
+def hist_vec_by_r(x, r, r_bin, r_max):
     r_max2 = r_max ** 2
     ret = np.zeros(int(r_max / r_bin) + 1, dtype=np.float)
     cter = np.zeros(ret.shape, dtype=np.float)
