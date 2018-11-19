@@ -54,6 +54,12 @@ def scatter_xy(x, y, x_range, bins, q_bin, q_max, zero_padding=1, expand=0, use_
     #                          [-np.arange(z_bins[0]), :, (z_bins[-1] + 1) % 2:-1]
     #                          [:, -np.arange(z_bins[1]), :]],
     #                         axis=-1)
+    # _sq_xy = np.concatenate([_rft_sq_xy,
+    #                          _rft_sq_xy.conj()
+    #                          [-np.arange(z_bins[0], :, :]
+    #                          [:, -np.arange(z_bins[1]),:]
+    #                          [:,:, np.arange(z_bins[2] - z_bins[2] // 2 -1, 0, -1)]],
+    #                         axis=-1)
 
     fslice = tuple([slice(0, _) for _ in z_bins])
     lslice = np.arange(z_bins[-1] - z_bins[-1] // 2 - 1, 0, -1)
