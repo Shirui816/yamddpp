@@ -64,7 +64,7 @@ def _cu_kernel_complex(x, y, r, r_bin, r_max2, ret_real, ret_imag, cter):
         tmp += r[k, idx] ** 2
     if tmp < r_max2:
         jdx = int(tmp ** 0.5 / r_bin)
-        cuda.atomic.add(ret_real, jdx, x[i])
+        cuda.atomic.add(ret_real, jdx, x[i])  # currently cuda.atomic.add does not support np.complex
         cuda.atomic.add(ret_imag, jdx, y[i])
         cuda.atomic.add(cter, jdx, 1)
 
