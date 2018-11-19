@@ -70,7 +70,8 @@ def _cu_kernel_complex(x, y, r, r_bin, r_max2, ret_real, ret_imag, cter):
 
 
 def hist_vec_by_r_cu(x, r, r_bin, r_max, gpu=0):
-    r"""
+    r"""Summing vector based function to modulus based function.
+    $f(r) := \int F(\bm{r})\delta(r-|\bm{r}|)\mathrm{d}\bm{r} / \int \delta(r-|\bm{r}|)\mathrm{d}\bm{r}$
     :param x: np.ndarray, input
     :param r: np.ndarray[ndim=2], x[dim_1, dim_2, ..., dim_n] ~ (r[1, dim_1(i)], r[2, dim_2(j), ...)
     :param r_bin: double, bin size of r
