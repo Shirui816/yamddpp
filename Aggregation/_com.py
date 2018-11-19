@@ -2,7 +2,7 @@ import numpy as np
 
 _bins = 500
 _bin_size = 2 * np.pi / _bins
-_d = np.linspace(0, 2*np.pi, _bins, endpoint=False)
+_d = np.linspace(0, 2 * np.pi, _bins, endpoint=False)
 
 
 def _circfuncs_common(samples, high, low):
@@ -15,7 +15,7 @@ def _circfuncs_common(samples, high, low):
     samples = np.asarray(samples)
     if samples.size == 0:
         return np.nan
-    return (samples - low)*2.*np.pi / (high - low)
+    return (samples - low) * 2. * np.pi / (high - low)
 
 
 def _circ_mean(ang, axis=None, mass=1):
@@ -38,7 +38,7 @@ def _circ_midpoint(x, _bin_size, _bins):
     :param _bins: int, how many bins.
     :return: np.ndarray
     """
-    p = np.bincount((x/_bin_size).astype(np.int), minlength=_bins)
+    p = np.bincount((x / _bin_size).astype(np.int), minlength=_bins)
     return _circ_mean(_d[p > 0])
 
 
