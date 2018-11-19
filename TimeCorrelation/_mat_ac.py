@@ -14,15 +14,16 @@ def vec_ac(x, cum=True):
     if np.issubdtype(x.dtype, np.complex):
         fft = np.fft.fft
         ifft = np.fft.ifft
-    n = next_regular(2 * x.shape[0])
+    n = x.shape[0]
+    s = next_regular(2 * n)
     summing_axes = tuple(range(1, x.ndim)) if cum else \
         tuple(range(2, x.ndim))
-    norm = np.arange(x.shape[0], 0, -1)
+    norm = np.arange(n, 0, -1)
     if not cum:
         norm = np.expand_dims(norm, axis=-1)
     # summing over samples and dimension or just dimension
-    return ifft(np.sum(abs(fft(x, axis=0, n=n)) ** 2,
-                       axis=summing_axes), axis=0, n=n)[:x.shape[0]].real / norm
+    return ifft(np.sum(abs(fft(x, axis=0, n=s)) ** 2,
+                       axis=summing_axes), axis=0, n=s)[:n].real / norm
 
 
 def mat_ac(x):
@@ -35,7 +36,8 @@ def mat_ac(x):
     if np.issubdtype(x.dtype, np.complex):
         fft = np.fft.fft
         ifft = np.fft.ifft
-    n = next_regular(2 * x.shape[0])
-    norm = np.arange(x.shape[0], 0, -1).reshape(x.shape[0], *[1] * (x.ndim - 1))
-    return ifft(abs(fft(x, axis=0, n=n)) ** 2,
-                axis=0, n=n)[:x.shape[0]].real / norm
+    n = x.shape[0]
+    s = next_regular(2 * n)  # 2 * n - 1 is fine.
+    norm = np.arange(n, 0, -1).reshape(n, *[1] * (x.ndim - 1))
+    return ifft(abs(fft(x, axis=0, n=s)) ** 2,
+                axis=0, n=s)[:x.shape[0]].real / norm
