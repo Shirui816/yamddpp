@@ -34,7 +34,7 @@ def unravel_indices_f(dim, gpu=0):
     return ret
 
 
-@cuda.jit("void(float64[:], float64[:,:], float64, float64, float64[:], uint32[:])")
+@cuda.jit
 def _cu_kernel(x, r, r_bin, r_max2, ret, cter):
     i = cuda.grid(1)
     if i >= x.shape[0]:
@@ -51,7 +51,7 @@ def _cu_kernel(x, r, r_bin, r_max2, ret, cter):
         cuda.atomic.add(cter, jdx, 1)
 
 
-@cuda.jit("void(float64[:], float64[:,:], float64, float64, float64[:], float64[:], uint32[:])")
+@cuda.jit  # x, y can be any dimension
 def _cu_kernel_complex(x, y, r, r_bin, r_max2, ret_real, ret_imag, cter):
     i = cuda.grid(1)
     if i >= x.shape[0]:
@@ -87,7 +87,9 @@ def norm_to_vec_cu(x, r, r_bin, r_max, gpu=0):
         tpb = device.WARP_SIZE
         bpg = int(np.ceil(x.shape[0] / tpb))
         if np.issubdtype(x.dtype, np.complex):
-            _cu_kernel_complex[bpg, tpb](x.real, x.imag, r, r_bin, r_max2, ret, cter)
+            ret_imag = np.zeros(int(r_max / r_bin) + 1, dtype=np.float)
+            _cu_kernel_complex[bpg, tpb](x.real, x.imag, r, r_bin, r_max2, ret, ret_imag, cter)
+            ret = ret + ret_imag * 1j
         else:
             _cu_kernel[bpg, tpb](x, r, r_bin, r_max2, ret, cter)
     cter[cter == 0] = 1
