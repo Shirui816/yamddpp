@@ -47,20 +47,6 @@ def scatter_xy(x, y, x_range, bins, q_bin, q_max, zero_padding=1, expand=0, use_
         rho_y = np.pad(rho_y, [(0, _ * __) for _, __ in zip(rho_y.shape, expand)], 'wrap')
         _rft_sq_y = np.fft.rfftn(rho_y, s=z_bins)
     _rft_sq_xy = _rft_sq_x.conj() * _rft_sq_y  # circular correlation.
-
-    # _sq_xy = np.concatenate([_rft_sq_xy,
-    #                          _rft_sq_xy.conj()
-    #                          [:, :, ::-1]
-    #                          [-np.arange(z_bins[0]), :, (z_bins[-1] + 1) % 2:-1]
-    #                          [:, -np.arange(z_bins[1]), :]],
-    #                         axis=-1)
-    # _sq_xy = np.concatenate([_rft_sq_xy,
-    #                          _rft_sq_xy.conj()
-    #                          [-np.arange(z_bins[0], :, :]
-    #                          [:, -np.arange(z_bins[1]),:]
-    #                          [:,:, np.arange(z_bins[2] - z_bins[2] // 2 -1, 0, -1)]],
-    #                         axis=-1)
-
     fslice = tuple([slice(0, _) for _ in z_bins])
     lslice = np.arange(z_bins[-1] - z_bins[-1] // 2 - 1, 0, -1)
     pad_axes = [(0, 1)] * (n_dim - 1) + [(0, 0)]
