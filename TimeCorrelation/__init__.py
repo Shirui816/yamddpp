@@ -4,7 +4,7 @@ import numpy as np
 
 
 def next_regular(target):
-    r"""Copy from scipy.signal.fftconvolve
+    r"""Copied from scipy.signal.fftconvolve
     Find the next regular number greater than or equal to target.
     Regular numbers are composites of the prime factors 2, 3, and 5.
     Also known as 5-smooth numbers or Hamming numbers, these are the optimal
