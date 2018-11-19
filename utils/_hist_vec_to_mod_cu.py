@@ -34,7 +34,7 @@ def unravel_indices_f(dim, gpu=0):
     return ret
 
 
-@cuda.jit
+@cuda.jit  # x can be array of any dimension
 def _cu_kernel(x, r, r_bin, r_max2, ret, cter):
     i = cuda.grid(1)
     if i >= x.shape[0]:
@@ -51,7 +51,7 @@ def _cu_kernel(x, r, r_bin, r_max2, ret, cter):
         cuda.atomic.add(cter, jdx, 1)
 
 
-@cuda.jit  # x, y can be any dimension
+@cuda.jit  # x, y can be arrays of any dimension
 def _cu_kernel_complex(x, y, r, r_bin, r_max2, ret_real, ret_imag, cter):
     i = cuda.grid(1)
     if i >= x.shape[0]:
