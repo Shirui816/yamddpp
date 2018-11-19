@@ -51,7 +51,8 @@ def scatter_xy(x, y, x_range, bins, q_bin, q_max, zero_padding=1, expand=0, use_
     lslice = np.arange(z_bins[-1] - z_bins[-1] // 2 - 1, 0, -1)
     pad_axes = [(0, 1)] * (n_dim - 1) + [(0, 0)]
     flip_axes = tuple(range(n_dim - 1))
-    # fftn(a) = rfftn(a)[-np.arange(i),-np.arange(j)...,np.arange(k-k//2-1,0,-1)]
+    # fftn(a) = np.concatenate([rfftn(a),
+    # conj(rfftn(a))[-np.arange(i),-np.arange(j)...,np.arange(k-k//2-1,0,-1)]], axis=-1)
     _sq_xy = np.concatenate([_rft_sq_xy, np.flip(np.pad(_rft_sq_xy.conj(), pad_axes, 'wrap'),
                                                  axis=flip_axes)[fslice][..., lslice]], axis=-1)
     # np.fft.rfftfreq does not work here, must use complete fft result.
