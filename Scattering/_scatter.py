@@ -61,6 +61,7 @@ def scatter_xy(x, y, x_range, bins, q_bin, q_max, zero_padding=1, expand=0, use_
     flip_axes = tuple(range(z_bins.shape[0] - 1))
     _sq_xy = np.concatenate([_rft_sq_xy, np.flip(np.pad(_rft_sq_xy.conj(), pad_axes, 'wrap'),
                                                  axis=flip_axes)[fslice][..., lslice]], axis=-1)
+    # np.fft.rfftfreq does not work here, must use complete fft result.
     q = np.vstack([np.fft.fftfreq(_sq_xy.shape[_], _d[_]) for _ in range(_d.shape[0])])
     q = q * 2 * np.pi
     if use_gpu is False:
