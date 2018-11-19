@@ -1,5 +1,5 @@
 import numpy as np
-from . import _next_regular
+from . import next_regular
 
 
 def vec_ac(x, cum=True):
@@ -14,7 +14,7 @@ def vec_ac(x, cum=True):
     if np.issubdtype(x.dtype, np.complex):
         fft = np.fft.fft
         ifft = np.fft.ifft
-    n = _next_regular(2 * x.shape[0])
+    n = next_regular(2 * x.shape[0])
     summing_axes = tuple(range(1, x.ndim)) if cum else \
         tuple(range(2, x.ndim))
     norm = np.arange(x.shape[0], 0, -1)
@@ -35,7 +35,7 @@ def mat_ac(x):
     if np.issubdtype(x.dtype, np.complex):
         fft = np.fft.fft
         ifft = np.fft.ifft
-    n = _next_regular(2 * x.shape[0])
+    n = next_regular(2 * x.shape[0])
     norm = np.arange(x.shape[0], 0, -1).reshape(x.shape[0], *[1] * (x.ndim - 1))
     return ifft(abs(fft(x, axis=0, n=n)) ** 2,
                 axis=0, n=n)[:x.shape[0]].real / norm

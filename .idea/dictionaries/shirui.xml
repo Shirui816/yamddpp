@@ -1,21 +1,11 @@
 <component name="ProjectDictionaryState">
-  <dictionary name="shirui">
+  <dictionary name="Shirui">
     <words>
-      <w>autocorrelation</w>
-      <w>circ</w>
-      <w>circfuncs</w>
-      <w>cter</w>
-      <w>cuda</w>
-      <w>cumsum</w>
-      <w>datas</w>
-      <w>ibox</w>
-      <w>ifft</w>
-      <w>imag</w>
-      <w>ndarray</w>
-      <w>ndarry</w>
-      <w>shirui</w>
-      <w>traj</w>
-      <w>uint</w>
+      <w>allclose</w>
+      <w>fftconvolve</w>
+      <w>fftpack</w>
+      <w>rfft</w>
+      <w>scipy</w>
     </words>
   </dictionary>
 </component>
