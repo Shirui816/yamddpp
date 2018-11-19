@@ -5,7 +5,7 @@ from math import ceil
 from pyculib.sorting import RadixSort
 
 
-@cuda.jit("int64(float64[:], float64[:], uint32[:])", device=True)
+@cuda.jit("uint32(float64[:], float64[:], uint32[:])", device=True)
 def cu_cell_id(p, box, ibox):
     return floor((p[0] / box[0] + 0.5) * ibox[0]) + \
            floor((p[1] / box[1] + 0.5) * ibox[1]) * ibox[0] + \
@@ -23,12 +23,20 @@ def cu_cell_ind(pos, box, ibox, ret):
         ret[i] = ic
 
 
-def count(cell_id):
+def cell_count(cell_id):
     r"""
     :param cell_id: must be sorted.
     :return: cumsum of count of particles in cells.
     """
     return np.append(0, np.cumsum(np.bincount(cell_id, minlength=cell_id.max() + 1)))
+
+
+@cuda.jit("void(uint32[:], uint32[:])")
+def cu_cell_count(cell_id, ret):
+    i = cuda.grid(1)
+    if i >= cell_id.shape[0]:
+        return
+    cuda.atomic.add(ret, cell_id[i] + 1, 1)
 
 
 def cu_cell_list(pos, box, ibox, gpu=0):
@@ -47,8 +55,11 @@ def cu_cell_list(pos, box, ibox, gpu=0):
         else:
             cell_list = np.argsort(cell_id)
             cell_id = cell_id[cell_list]
-    cell_count = count(cell_id)
-    return cell_list.astype(np.int64), cell_count.astype(np.int64)
+        cell_counts = np.zeros(cell_id.max() + 1, dtype=np.uint32)
+        cu_cell_count[bpg, tpb](cell_id, cell_counts)
+    cell_counts = np.cumsum(cell_counts)
+    # cell_counts = cell_count(cell_id)
+    return cell_list.astype(np.int64), cell_counts.astype(np.int64)
 
 # calling: for a particle in nth cell, cell_count[n] gives the start index of
 # cell_list, and cell_count[n+1] gives the end index of cell_list.
