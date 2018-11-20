@@ -35,8 +35,6 @@ def scatter_xy(x, y, x_range, bins, q_bin, q_max, zero_padding=1, expand=0, use_
     rho_x, edge = np.histogramdd(x, bins=bins, range=x_range)
     if expand.ndim < 1:
         expand = np.asarray([expand] * rho_x.ndim)
-    box = np.array(np.array([_[1] - _[0] for _ in x_range]))
-    _d = box / bins
     z_bins = (np.asarray(rho_x.shape) * zero_padding).astype(np.int64)
     rho_x = np.pad(rho_x, [(0, _ * __) for _, __ in zip(rho_x.shape, expand)], 'wrap')
     _rft_sq_x = np.fft.rfftn(rho_x, s=z_bins)
@@ -56,6 +54,8 @@ def scatter_xy(x, y, x_range, bins, q_bin, q_max, zero_padding=1, expand=0, use_
     _sq_xy = np.concatenate([_rft_sq_xy, np.flip(np.pad(_rft_sq_xy.conj(), pad_axes, 'wrap'),
                                                  axis=flip_axes)[fslice][..., lslice]], axis=-1)
     # np.fft.rfftfreq does not work here, must use complete fft result.
+    box = np.array(np.array([_[1] - _[0] for _ in x_range]))
+    _d = box / bins
     q = np.vstack([np.fft.fftfreq(_sq_xy.shape[_], _d[_]) for _ in range(_d.shape[0])])
     q = q * 2 * np.pi
     if use_gpu is False:
