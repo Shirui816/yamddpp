@@ -17,7 +17,7 @@ def distance2(a, b):
 
 @cuda.jit("void(float64[:,:,:], float64[:,:])")
 def _cu_kernel(x, ret):  # ret -> (n_particles, n_frames)
-    i, j = cuda.grid(2)
+    i, j = cuda.grid(2)  # x -> (n_frames, n_particles, n_dim)
     if i >= x.shape[0]:
         return
     if j >= x.shape[0] - i:
