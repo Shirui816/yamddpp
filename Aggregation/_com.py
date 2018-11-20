@@ -58,5 +58,5 @@ def com(x, hi, lo, axis=0, mass=1, midpoint=False):
         mean_ang = _circ_mean(x_ang, axis=axis, mass=mass)
     else:
         mean_ang = np.apply_along_axis(_circ_midpoint, axis,
-                                   x_ang, _bin_size, _bins)
+                                       x_ang, _bin_size, _bins)
     return mean_ang / 2 / np.pi * box + lo
