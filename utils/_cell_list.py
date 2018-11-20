@@ -5,13 +5,13 @@ from numpy.core.multiarray import ndarray
 
 @jit
 def cell_id(x: np.ndarray, box: np.ndarray, ibox: np.ndarray) -> int:
-    ind = np.asarray(((x / box + 0.5) * ibox), dtype=np.int64)
+    ind: ndarray = np.asarray(((x / box + 0.5) * ibox), dtype=np.int64)
     return ind[0] + ind[1] * ibox[0] + ind[2] * ibox[1] * ibox[0]
 
 
 @jit
 def i_cell(cid: np.ndarray, ibox: np.ndarray) -> int:  # ravel in Fortran way.
-    ind = np.asarray((cid + ibox) % ibox, dtype=np.int64)
+    ind: ndarray = np.asarray((cid + ibox) % ibox, dtype=np.int64)
     return ind[0] + ind[1] * ibox[0] + ind[2] * ibox[1] * ibox[0]
 
 
@@ -30,8 +30,8 @@ def cell_neighbours(ic: np.ndarray, ibox: np.ndarray) -> np.ndarray:
 
 @jit
 def box_map(box: np.ndarray, r_cut: "np.ndarray or float") -> tuple:
-    ibox = np.asarray(box / r_cut, dtype=np.int64)
-    ret = np.zeros((np.multiply.reduce(ibox), 3 ** box.shape[0]))
+    ibox: ndarray = np.asarray(box / r_cut, dtype=np.int64)
+    ret: ndarray = np.zeros((np.multiply.reduce(ibox), 3 ** box.shape[0]))
     for ind in np.ndindex(ibox):
         ind = np.asarray(ind)
         ic = i_cell(ind, ibox)
@@ -41,8 +41,8 @@ def box_map(box: np.ndarray, r_cut: "np.ndarray or float") -> tuple:
 
 @jit
 def linked_cl(pos: np.ndarray, box: np.ndarray, ibox: np.ndarray) -> tuple:
-    head = np.zeros(np.multiply.reduce(ibox), dtype=np.int64) - 1
-    body = np.zeros(pos.shape[0], dtype=np.int64)
+    head: ndarray = np.zeros(np.multiply.reduce(ibox), dtype=np.int64) - 1
+    body: ndarray = np.zeros(pos.shape[0], dtype=np.int64)
     for i in range(pos.shape[0]):
         ic = cell_id(pos[i], box, ibox)
         body[i] = head[ic]
