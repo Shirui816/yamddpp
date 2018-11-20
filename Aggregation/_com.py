@@ -52,6 +52,8 @@ def com(x, hi, lo, axis=0, mass=1, midpoint=False):
     :param midpoint: bool, calculate midpoint or COM
     :return: np.ndarray, midpoint or COM
     """
+    hi = np.asarray(hi)
+    lo = np.asarray(lo)
     box = hi - lo
     x_ang = _circfuncs_common(x, hi, lo)
     if not midpoint:
