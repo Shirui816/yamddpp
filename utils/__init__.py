@@ -4,7 +4,7 @@ import numpy as np
 
 
 def rfft2fft(rfft, n):
-    r"""Extend rfft output to FFT outputs.
+    r"""Extend rfft output to FFT output.
 
     See numpy.fft.rfftn for details, the last axis of output of rfftn is always
     n // 2 + 1.
