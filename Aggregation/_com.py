@@ -42,12 +42,12 @@ def _circ_midpoint(x, _bin_size, _bins):
     return _circ_mean(_d[p > 0])
 
 
-def com(x, hi, lo, axis=None, mass=1, midpoint=False):
+def com(x, hi, lo, axis=0, mass=1, midpoint=False):
     r"""Compute COM or median of PBC datas.
     :param x: np.ndarray, input coordinates.
     :param hi: np.ndarray, box.high
     :param lo: np.ndarray, box.low
-    :param axis: int, mean along give axis.
+    :param axis: int, mean along given axis.
     :param mass: np.ndarray or float, mass of particles.
     :param midpoint: bool, calculate midpoint or COM
     :return: np.ndarray, midpoint or COM
@@ -55,8 +55,8 @@ def com(x, hi, lo, axis=None, mass=1, midpoint=False):
     box = hi - lo
     x_ang = _circfuncs_common(x, hi, lo)
     if not midpoint:
-        ang = _circ_mean(x_ang, axis=axis, mass=mass)
-        return ang / 2 / np.pi * box + lo
-    mean_ang = np.apply_along_axis(_circ_midpoint, axis,
+        mean_ang = _circ_mean(x_ang, axis=axis, mass=mass)
+    else:
+        mean_ang = np.apply_along_axis(_circ_midpoint, axis,
                                    x_ang, _bin_size, _bins)
     return mean_ang / 2 / np.pi * box + lo
