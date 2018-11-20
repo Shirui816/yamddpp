@@ -1,5 +1,6 @@
 from numba import jit
 import numpy as np
+from numpy.core.multiarray import ndarray
 
 
 @jit
@@ -19,7 +20,7 @@ def i_cell(cid: np.ndarray, ibox: np.ndarray) -> int:  # ravel in Fortran way.
 
 @jit
 def cell_neighbours(ic: np.ndarray, ibox: np.ndarray) -> np.ndarray:
-    ret = np.zeros(3 ** ibox.shape[0], dtype=np.int64)
+    ret: ndarray = np.zeros(3 ** ibox.shape[0], dtype=np.int64)
     for i, ind in enumerate(np.ndindex((3,) * ibox.shape[0])):
         # iterator of unraveled n-dimensional indices.
         ind = np.asarray(ind) - 1
