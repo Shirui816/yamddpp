@@ -37,7 +37,7 @@ def rdf_xy(x, y, x_range, bins, r_bin=0.2, use_gpu=False):
         _rdf = hist_vec_by_r(_rdf_xyz, _r, r_bin, box.min() / 2)
     else:
         _rdf = hist_vec_by_r_cu(_rdf_xyz, _r, r_bin, box.min() / 2,
-                              gpu=use_gpu)
+                                gpu=use_gpu)
     _rdf /= x.shape[0] * y.shape[0]
     _rdf *= np.multiply.reduce(bins)
     return (np.arange(_rdf.shape[0]) + 0.5) * r_bin, _rdf
