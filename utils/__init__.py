@@ -21,8 +21,8 @@ def rfft2fft(rfft, n):
     :raises: ValueError if n // 2 + 1 is not rfft.shape[-1]
     """
     if n // 2 + 1 != rfft.shape[-1]:
-        raise ValueError("The sizes of last axis of fftn (n_fftn) outputs rfftn outputs"
-                         " (n_rfftn) musst satisfy n_fftn // 2 + 1 = n_rfftn!")
+        raise ValueError("The sizes of last axis of fftn (n_fftn) outputs and rfftn"
+                         " outputs (n_rfftn) must satisfy n_fftn // 2 + 1 == n_rfftn!")
     n_dim = rfft.ndim
     fslice = tuple([slice(0, _) for _ in rfft.shape])
     lslice = np.arange(n - n // 2 - 1, 0, -1)
