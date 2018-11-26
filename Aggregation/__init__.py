@@ -20,10 +20,10 @@ def handle_clusters(clusters, pos, types, box):
         p_cluster -= p_cluster.mean(axis=0)  # make com to be 0
         rg_tensor = p_cluster.T.dot(p_cluster) / p_cluster.shape[0]
         e, v = np.linalg.eig(rg_tensor)
-        o.write(fmt % (i, p_cluster.shape[0], e[0], e[1], e[2],
-                       v.T[0, 0], v.T[0, 1], v.T[0, 2],
-                       v.T[1, 0], v.T[1, 1], v.T[1, 2],
-                       v.T[2, 0], v.T[2, 1], v.T[2, 2]))
+        meta.write(fmt % (i, p_cluster.shape[0], e[0], e[1], e[2],
+                          v.T[0, 0], v.T[0, 1], v.T[0, 2],
+                          v.T[1, 0], v.T[1, 1], v.T[1, 2],
+                          v.T[2, 0], v.T[2, 1], v.T[2, 2]))
         xyz = open('%04d.xyz' % i, 'w')
         xyz.write('%d\nmeta\n' % (p_cluster.shape[0]))
         for __, _ in zip(p_types, p_cluster):
