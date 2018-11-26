@@ -69,4 +69,4 @@ def get_from_cell(cid, head, body):
     while j != -1:
         ret.append(j)
         j = body[j]
-    return np.asarray(ret, dtype=np.int)
+    return ret
