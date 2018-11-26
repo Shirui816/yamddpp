@@ -22,16 +22,19 @@ def normal_mode_dot(a, b, ret):  # much more faster than np.tensordot or np.eisu
 
 
 def normal_modes(pos, modes=False):
-    r"""Normal modes of polymer chains (same chain lengths).
+    r"""Normal modes of polymer chains (same chain lengths), definition of $q_i$ was
+    taken from Iwao Teraoka, Polymer Solutions, pp. 223.
+
     :param pos: np.ndarray, positions in (n_frames (optional), n_chains (optional), chain_length, n_dimensions)
-    :param modes: iterable, modes to calculate
+    :param modes: iterable, modes to calculate. mode 1 ~ chain_length are calculated by default.
     :return: np.ndarray, normal modes (..., n_modes, n_dimensions)
     """
     chain_length = pos.shape[-2]
     # given modes or all 1 - n modes by default.
     modes = np.asarray(modes) - 1 / 2 if modes is not False else \
         np.arange(1, chain_length + 1)
+    # def was taken from Iwao Teraoka, polymer solutions, pp. 223
     factors = 1 / chain_length * np.asarray(
-        [np.cos(p * np.pi / chain_length * (np.arange(1, chain_length + 1) - 1 / 2)) for p in modes]
+        [np.cos(p * np.pi / chain_length * (np.arange(1, chain_length + 1))) for p in modes]
     )
     return normal_mode_dot(factors, pos)
