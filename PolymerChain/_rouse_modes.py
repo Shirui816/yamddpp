@@ -21,7 +21,7 @@ def _batch_dot(a, b, ret):  # much more faster than np.tensordot or np.einsum
             ret[i, j] = tmp
 
 
-def normal_modes(pos, modes=False):
+def normal_modes(pos, modes=None):
     r"""Normal modes of polymer chains (same chain lengths), definition of $q_i$ was
     taken from Iwao Teraoka, Polymer Solutions, pp. 223.
 
@@ -64,7 +64,7 @@ def normal_modes(pos, modes=False):
     """
     chain_length = pos.shape[-2]
     # given modes or all 1 ~ n modes by default.
-    modes = np.asarray(modes) - 1 / 2 if modes is not False else \
+    modes = np.asarray(modes) - 1 / 2 if modes is not None else \
         np.arange(1, chain_length + 1)
     # def was taken from Iwao Teraoka, Polymer Solutions, pp. 223
     factors = 1 / chain_length * np.asarray(
