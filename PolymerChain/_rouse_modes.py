@@ -62,7 +62,7 @@ def normal_modes(pos, modes=None):
 
     In [1]: b = np.random.random((30,100,250,3))
 
-    In [2]: np.allclose(normal_modes(b),np.einsum('ij,abjk->abik', factors, b))
+    In [2]: np.allclose(normal_modes(b),np.einsum('ij,...jk->...ik', factors, b))
     Out[2]: True
 
     In [3]: %timeit np.einsum('ab,cdbe->cdae', factors, b)
