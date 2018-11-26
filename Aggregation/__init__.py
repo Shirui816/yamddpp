@@ -41,6 +41,8 @@ def coarse_grained_cluster(pos, box, func, kwargs=None, r_cut=0):
     :param r_cut: float or np.ndarray, coarse-grain size, 0 for clustering directly.
     :return: list, clusters with particles ids.
     """
+    if kwargs is None:
+        kwargs = {}
     if not r_cut:
         return func(pos, box, **kwargs)
     bins = np.asarray(box / r_cut, dtype=np.int)
