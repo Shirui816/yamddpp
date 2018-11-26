@@ -26,10 +26,12 @@ def vec_ac(x, cum=True):
                        axis=summing_axes), axis=0, n=s)[:n].real / norm
 
 
-def mat_ac(x):
+def mat_ac(x, axes=None):
     r"""Matrix autocorrelation function.
     :param x: np.ndarray -> (n_frames, ...) of input
+    :param axes: tuple or int, axes that summing up.
     :return: np.ndarray -> (n_frames, ...) of output
+    :raises: ValueError, if axes contains 0.
     """
     fft = np.fft.rfft
     ifft = np.fft.irfft
@@ -39,5 +41,13 @@ def mat_ac(x):
     n = x.shape[0]
     s = next_regular(2 * n)  # 2 * n - 1 is fine.
     norm = np.arange(n, 0, -1).reshape(n, *[1] * (x.ndim - 1))
-    return ifft(abs(fft(x, axis=0, n=s)) ** 2,
-                axis=0, n=s)[:n].real / norm
+    if axes is None:
+        return ifft(abs(fft(x, axis=0, n=s)) ** 2,
+                    axis=0, n=s)[:n].real / norm
+    else:
+        axes = np.asarray(np.atleast_1d(axes), dtype=np.int)
+        if 0 in axes:
+            raise ValueError("The 1st axis should be time axis!")
+        norm = norm.reshape(n, *[1] * (x.ndim - 1 - axes.size))
+        return ifft(np.sum(abs(fft(x, axis=0, n=s)) ** 2, axis=tuple(axes)),
+                    axis=0, n=s)[:n].real / norm

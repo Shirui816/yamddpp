@@ -5,7 +5,7 @@ import numpy as np
 
 @guvectorize([(float64[:, :], float64[:, :], float64[:, :])], '(n,m),(m,k)->(n,k)',
              target='parallel')  # target='cpu','gpu'
-def normal_mode_dot(a, b, ret):  # much more faster than np.tensordot or np.eisum
+def _normal_mode_dot(a, b, ret):  # much more faster than np.tensordot or np.eisum
     r"""Vectorized universal function.
     :param a: np.ndarray, factors with (n_modes, chain_length)
     :param b: np.ndarray, positions with (..., chain_length, n_dimensions),
@@ -51,4 +51,4 @@ def normal_modes(pos, modes=False):
     factors = 1 / chain_length * np.asarray(
         [np.cos(p * np.pi / chain_length * (np.arange(1, chain_length + 1))) for p in modes]
     )
-    return normal_mode_dot(factors, pos)
+    return _normal_mode_dot(factors, pos)
