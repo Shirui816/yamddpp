@@ -42,7 +42,7 @@ def box_map(box: ndarray, r_cut: "ndarray or float") -> tuple:
 @jit
 def linked_cl(pos: ndarray, box: ndarray, ibox: ndarray) -> tuple:
     head: ndarray = np.zeros(np.multiply.reduce(ibox), dtype=np.int64) - 1
-    body: ndarray = np.zeros(pos.shape[0], dtype=np.int64)
+    body: ndarray = np.zeros(pos.shape[0], dtype=np.int64) - 1
     for i in range(pos.shape[0]):
         ic = cell_id(pos[i], box, ibox)
         body[i] = head[ic]
