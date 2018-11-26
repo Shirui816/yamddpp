@@ -58,6 +58,19 @@ def normal_modes(pos, modes=None):
     ....:                       for i in range(pos.shape[0])])
     9.07 s ± 1.14 s per loop (mean ± std. dev. of 7 runs, 1 loop each)
 
+    Or by np.einsum, which is convenient but slow:
+
+    In [1]: b = np.random.random((30,100,250,3))
+
+    In [2]: np.allclose(normal_modes(b),np.einsum('ab,cdbe->cdae', factors, b))
+    Out[2]: True
+
+    In [3]: %timeit np.einsum('ab,cdbe->cdae', factors, b)
+    3.5 s ± 1.54 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+
+    In [4]: %timeit normal_modes(b)
+    324 ms ± 1.74 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+
     :param pos: np.ndarray, positions in (n_frames (optional), n_chains (optional), chain_length, n_dimensions)
     :param modes: iterable, modes to calculate. mode 1 ~ chain_length are calculated by default.
     :return: np.ndarray, normal modes (..., n_modes, n_dimensions)
