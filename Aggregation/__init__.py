@@ -32,6 +32,15 @@ def handle_clusters(clusters, pos, types, box):
 
 
 def coarse_grained_cluster(pos, box, func, kwargs=None, r_cut=0):
+    r"""Cluster particles directly or cluster the cells to reduce calculation.
+
+    :param pos: np.ndarray, positions
+    :param box: np.ndarray, box
+    :param func: callable, clustering method
+    :param kwargs: dictionary, args of func
+    :param r_cut: float or np.ndarray, coarse-grain size, 0 for clustering directly.
+    :return: list, clusters with particles ids.
+    """
     if not r_cut:
         return func(pos, box, **kwargs)
     bins = np.asarray(box / r_cut, dtype=np.int)
