@@ -34,7 +34,7 @@ def normal_modes(pos, modes=False):
     )
     >>>np.allclose(normal_modes(x), np.swapaxes(np.tensordot(factors, x, axes=[1, 1]), 0, 1))
     >>>True
-    >>>x = np.random.random((20, 10, 250, 3))  # 20 frames, 10 chains, 250 beads in 3 dimension for example.
+    >>>x = np.random.random((20, 10, 250, 3))  # 20 frames, 10 chains, 250 beads in 3 dimensions for example.
     >>>np.allclose(np.asarray([np.swapaxes(np.tensordot(factors, x[i], axes=[1, 1]), 0, 1))
                                for i in range(20)]), normal_mode(x))
     >>>True
