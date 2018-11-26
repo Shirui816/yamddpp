@@ -25,6 +25,20 @@ def normal_modes(pos, modes=False):
     r"""Normal modes of polymer chains (same chain lengths), definition of $q_i$ was
     taken from Iwao Teraoka, Polymer Solutions, pp. 223.
 
+    >>>Xp = lambda x, p : np.mean(np.cos(p * np.pi/x.shape[1] * np.arange(1,x.shape[1]+1))[:,None] * x[0], axis=0)
+    >>>x = np.random.random((1, 250, 3))
+    >>>np.allclose(normal_modes(x), np.asarray([Xp(x, p) for p in range(1, 251)]))
+    >>>True
+    >>>factors = 1 / chain_length * np.asarray(
+        [np.cos(p * np.pi / chain_length * (np.arange(1, chain_length + 1))) for p in modes]
+    )
+    >>>np.allclose(normal_modes(x), np.swapaxes(np.tensordot(factors, x, axes=[1, 1]), 0, 1))
+    >>>True
+    >>>x = np.random.random((20, 10, 250, 3))  # 20 frames, 10 chains, 250 beads in 3 dimension for example.
+    >>>np.allclose(np.asarray([np.swapaxes(np.tensordot(factors, x[i], axes=[1, 1]), 0, 1))
+                               for i in range(20)]), normal_mode(x))
+    >>>True
+
     :param pos: np.ndarray, positions in (n_frames (optional), n_chains (optional), chain_length, n_dimensions)
     :param modes: iterable, modes to calculate. mode 1 ~ chain_length are calculated by default.
     :return: np.ndarray, normal modes (..., n_modes, n_dimensions)
