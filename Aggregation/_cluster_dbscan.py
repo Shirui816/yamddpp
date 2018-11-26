@@ -33,6 +33,15 @@ def pbc_pairwise_distance(x, y, box, ret):
 
 def cluster(pos, box, weights=None, epsilon=1.08,
             minpts=5, gpu=0):  # these parameters are suitable for dpd with density = 3.0
+    r"""
+    :param pos: np.ndarray, position
+    :param box: np.ndarray, box
+    :param weights: np.ndarray, weights
+    :param epsilon: float
+    :param minpts: int
+    :param gpu: int
+    :return: np.ndarray, labels[i] is which cluster which contains pos[i].
+    """
     ret = np.zeros((pos.shape[0],) * 2, dtype=np.float)
     device = cuda.get_current_device()
     tpb2d = (device.WARP_SIZE,) * 2
