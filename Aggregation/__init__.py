@@ -1,5 +1,4 @@
 from ._com import com
-from ._com import com
 from utils import linked_cl
 from utils import get_from_cell
 import numpy as np
