@@ -76,7 +76,7 @@ def normal_modes(pos, modes=None):
     :return: np.ndarray, normal modes (..., n_modes, n_dimensions)
     """
     chain_length = pos.shape[-2]
-    modes = np.asarray(modes) - 1 / 2 if modes is not None else \
+    modes = np.atleast_1d(np.asarray(modes)) - 1 / 2 if modes is not None else \
         np.arange(1, chain_length + 1)
     factors = 1 / chain_length * np.asarray(
         [np.cos(p * np.pi / chain_length * (np.arange(1, chain_length + 1))) for p in modes]
