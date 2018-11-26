@@ -2,9 +2,6 @@ import numpy as np
 from numba import cuda
 from math import floor, sqrt, ceil
 from sklearn.cluster import DBSCAN
-from ._com import com
-from utils import linked_cl
-from utils import get_from_cell
 
 
 # For usage of cuda.jit, run `conda install cudatoolkit=9.0` after the
@@ -44,30 +41,9 @@ def cluster(pos, box, weights=None, epsilon=1.08,
         pbc_pairwise_distance[bpg2d, tpb2d](pos, pos, box, ret)
     db_fitted = DBSCAN(metric='precomputed',
                        n_jobs=-1, eps=epsilon, min_samples=minpts).fit(ret, sample_weight=weights)
-    clusters = [pos[db_fitted.labels_ == _]
-                for _ in list(set(db_fitted.labels_)) if _ != -1]
-    noises = pos[db_fitted.labels_ == -1]
-    return clusters, noises, db_fitted
+    # clusters = [pos[db_fitted.labels_ == _]
+    #            for _ in list(set(db_fitted.labels_)) if _ != -1]
+    # noises = pos[db_fitted.labels_ == -1]
+    return db_fitted.labels_
 
-
-def coarse_grained_cluster(pos, box, r_cut=0, epsilon=1.08, minpts=5, gpu=0):
-    if not r_cut:
-        return cluster(pos, box, epsilon=epsilon, minpts=minpts, gpu=gpu)
-    bins = np.asarray(box / r_cut, dtype=np.int)
-    # weights, _ = np.histogramdd(pos, bins=bins, range=[(-_ / 2, _ / 2) for _ in box])
-    # weights = weights.ravel(order='F')  # ravel in Fortran
-    # build the cell-list at the same time
-    head, body, weights = linked_cl(pos, box, bins)  # weights was already raveled in Fortran way
-    coordinates = np.vstack(np.unravel_index(np.arange(weights.shape[0]), bins, order='F')).T
-    coordinates = coordinates * r_cut
-    _, __, db_fitted = cluster(coordinates, box, weights=weights, epsilon=epsilon, minpts=minpts, gpu=gpu)
-    clusters = [np.arange(head.shape[0])[db_fitted.labels_ == _]
-                for _ in list(set(db_fitted.labels_)) if _ != -1]  # cell-ids of cells in one cluster
-    ret = []
-    for cells in clusters:  # cluster consists of cells, for cluster in clusters
-        tmp = []
-        for cell in cells:  # for cell in a cluster of cells
-            tmp.extend(get_from_cell(cell, head, body))  # find particles ids in the cell and add to tmp
-        ret.append(tmp)
-    return ret  # return the particle ids
 

@@ -1,5 +1,7 @@
 from ._com import com
-from ._cluster_dbscan import coarse_grained_cluster
+from ._com import com
+from utils import linked_cl
+from utils import get_from_cell
 import numpy as np
 
 
@@ -28,3 +30,25 @@ def handle_clusters(clusters, pos, types, box):
             xyz.write('%s %.4f %.4f %.4f\n' % (__, _[0], _[1], _[2]))
         xyz.close()
     meta.close()
+
+
+def coarse_grained_cluster(pos, box, func, kwargs={}, r_cut=0):
+    if not r_cut:
+        return func(pos, box, **kwargs)
+    bins = np.asarray(box / r_cut, dtype=np.int)
+    # weights, _ = np.histogramdd(pos, bins=bins, range=[(-_ / 2, _ / 2) for _ in box])
+    # weights = weights.ravel(order='F')  # ravel in Fortran
+    # build the cell-list at the same time
+    head, body, weights = linked_cl(pos, box, bins)  # weights was already raveled in Fortran way
+    coordinates = np.vstack(np.unravel_index(np.arange(weights.shape[0]), bins, order='F')).T
+    coordinates = coordinates * r_cut
+    fitted = func(coordinates, box, **kwargs)
+    clusters = [np.arange(head.shape[0])[fitted == _]
+                for _ in list(set(fitted)) if _ != -1]  # cell-ids of cells in one cluster
+    ret = []
+    for cells in clusters:  # cluster consists of cells, for cluster in clusters
+        tmp = []
+        for cell in cells:  # for cell in a cluster of cells
+            tmp.extend(get_from_cell(cell, head, body))  # find particles ids in the cell and add to tmp
+        ret.append(tmp)
+    return ret  # return the particle ids
