@@ -65,7 +65,7 @@ def normal_modes(pos, modes=None):
     In [2]: np.allclose(normal_modes(b),np.einsum('ij,...jk->...ik', factors, b))
     Out[2]: True
 
-    In [3]: %timeit np.einsum('ab,cdbe->cdae', factors, b)
+    In [3]: %timeit np.einsum('ij,...jk->...ik', factors, b)
     3.5 s ± 1.54 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 
     In [4]: %timeit normal_modes(b)
