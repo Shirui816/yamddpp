@@ -5,7 +5,7 @@ import numpy as np
 
 @guvectorize([(float64[:, :], float64[:, :], float64[:, :])], '(n,p),(p,m)->(n,m)',
              target='parallel')  # target='cpu','gpu'
-def _batch_dot(a, b, ret):  # much more faster than np.tensordot or np.eisum
+def _batch_dot(a, b, ret):  # much more faster than np.tensordot or np.einsum
     r"""Vectorized universal function.
     :param a: np.ndarray, factors with (n_modes, chain_length)
     :param b: np.ndarray, positions with (..., chain_length, n_dimensions),
