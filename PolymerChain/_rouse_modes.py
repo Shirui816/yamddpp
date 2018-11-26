@@ -3,9 +3,9 @@ from numba import float64
 import numpy as np
 
 
-@guvectorize([(float64[:, :], float64[:, :], float64[:, :])], '(n,m),(m,k)->(n,k)',
+@guvectorize([(float64[:, :], float64[:, :], float64[:, :])], '(n,p),(p,m)->(n,m)',
              target='parallel')  # target='cpu','gpu'
-def _normal_mode_dot(a, b, ret):  # much more faster than np.tensordot or np.eisum
+def _batch_dot(a, b, ret):  # much more faster than np.tensordot or np.eisum
     r"""Vectorized universal function.
     :param a: np.ndarray, factors with (n_modes, chain_length)
     :param b: np.ndarray, positions with (..., chain_length, n_dimensions),
@@ -13,12 +13,12 @@ def _normal_mode_dot(a, b, ret):  # much more faster than np.tensordot or np.eis
     :param ret: np.ndarray, results. (..., n_modes, n_dimensions)
     :return: np.ndarray ret.
     """
-    for i in range(a.shape[0]):
-        for k in range(b.shape[1]):
+    for i in range(ret.shape[0]):
+        for j in range(ret.shape[1]):
             tmp = 0.
-            for j in range(a.shape[1]):
-                tmp += a[i, j] * b[j, k]
-            ret[i, k] = tmp
+            for k in range(a.shape[1]):
+                tmp += a[i, k] * b[k, j]
+            ret[i, j] = tmp
 
 
 def normal_modes(pos, modes=False):
@@ -35,8 +35,8 @@ def normal_modes(pos, modes=False):
     >>>np.allclose(normal_modes(x), np.swapaxes(np.tensordot(factors, x, axes=[1, 1]), 0, 1))
     >>>True
     >>>x = np.random.random((20, 10, 250, 3))  # 20 frames, 10 chains, 250 beads in 3 dimensions for example.
-    >>>np.allclose(np.asarray([np.swapaxes(np.tensordot(factors, x[i], axes=[1, 1]), 0, 1))
-                               for i in range(20)]), normal_mode(x))
+    >>>np.allclose(np.asarray([np.swapaxes(np.tensordot(factors, x[i], axes=[1, 1]), 0, 1) for i in range(20)]),
+    normal_modes(x))
     >>>True
 
     :param pos: np.ndarray, positions in (n_frames (optional), n_chains (optional), chain_length, n_dimensions)
@@ -51,4 +51,4 @@ def normal_modes(pos, modes=False):
     factors = 1 / chain_length * np.asarray(
         [np.cos(p * np.pi / chain_length * (np.arange(1, chain_length + 1))) for p in modes]
     )
-    return _normal_mode_dot(factors, pos)
+    return _batch_dot(factors, pos)
