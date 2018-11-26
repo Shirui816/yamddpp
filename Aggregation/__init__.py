@@ -31,7 +31,7 @@ def handle_clusters(clusters, pos, types, box):
     meta.close()
 
 
-def coarse_grained_cluster(pos, box, func, kwargs={}, r_cut=0):
+def coarse_grained_cluster(pos, box, func, kwargs=None, r_cut=0):
     if not r_cut:
         return func(pos, box, **kwargs)
     bins = np.asarray(box / r_cut, dtype=np.int)
