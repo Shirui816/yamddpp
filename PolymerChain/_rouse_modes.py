@@ -47,7 +47,7 @@ def normal_modes(pos, modes=False):
     # given modes or all 1 ~ n modes by default.
     modes = np.asarray(modes) - 1 / 2 if modes is not False else \
         np.arange(1, chain_length + 1)
-    # def was taken from Iwao Teraoka, polymer solutions, pp. 223
+    # def was taken from Iwao Teraoka, Polymer Solutions, pp. 223
     factors = 1 / chain_length * np.asarray(
         [np.cos(p * np.pi / chain_length * (np.arange(1, chain_length + 1))) for p in modes]
     )
