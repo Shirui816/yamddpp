@@ -39,6 +39,25 @@ def normal_modes(pos, modes=False):
     normal_modes(x))
     >>>True
 
+    Speed test:
+
+    In [1]: pos = np.random.random((1000,1000,100,3))
+
+    In [2]: %timeit normal_modes(pos)
+    1.42 s ± 96.7 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+
+    In [3]: chain_length = 100
+
+    In [4]: modes = np.arange(1,101)
+
+    In [5]: factors = 1 / chain_length * np.asarray(
+    ...:         [np.cos(p * np.pi / chain_length * (np.arange(1, chain_length + 1))) for p in modes]
+    ...:     )
+
+    In [6]: %timeit np.asarray([np.swapaxes(np.tensordot(factors, pos[i], axes=[1, 1]), 0, 1)
+    ....:                       for i in range(pos.shape[0])])
+    9.07 s ± 1.14 s per loop (mean ± std. dev. of 7 runs, 1 loop each)
+
     :param pos: np.ndarray, positions in (n_frames (optional), n_chains (optional), chain_length, n_dimensions)
     :param modes: iterable, modes to calculate. mode 1 ~ chain_length are calculated by default.
     :return: np.ndarray, normal modes (..., n_modes, n_dimensions)
