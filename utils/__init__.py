@@ -1,6 +1,10 @@
 from ._hist_by_mod import hist_vec_by_r
 from ._hist_by_mod_cu import hist_vec_by_r_cu
 import numpy as np
+from ._cell_list import cell_id
+from ._cell_list import unravel_index_f
+from ._cell_list import linked_cl
+from ._cell_list import get_from_cell
 
 
 def rfft2fft(rfft, n):
