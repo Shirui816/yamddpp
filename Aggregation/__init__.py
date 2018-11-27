@@ -8,13 +8,26 @@ def pbc(p, d):
     return p - d * np.round(p / d)
 
 
-def handle_clusters(clusters, pos, types, box):
+def handle_clusters(clusters, pos, types, box, bins=50):
+    r"""Handle the results of clustering.
+    :param clusters: list, list of clusters/
+    :param pos: np.ndarray, positions
+    :param types: np.ndarray, types
+    :param box: np.ndarray, box
+    :param bins: int, bins to check percolation.
+    :return: None
+    """
     meta = open('cluster_meta.txt', 'w')
     fmt = '%04d %d %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f\n'
     for i, cluster in enumerate(clusters):
         p_cluster = pos[cluster]
         p_types = types[cluster]
+        percolate = np.asarray(
+            [np.all(np.histogram(_, bins=bins, range=(-__ / 2, __ / 2))[0] > 0) for _, __ in zip(p_cluster.T, box)],
+            dtype=np.bool)
+        center_of_mass = com(p_cluster, box / 2, -box / 2)
         midpoint = com(p_cluster, box / 2, -box / 2, midpoint=True)
+        midpoint[percolate] = center_of_mass[percolate]  # using midpoint if not percolate, else center of mass
         p_cluster = pbc(p_cluster - midpoint, box)  # always in (midpoint-box/2, midpoint+box/2)
         p_cluster -= p_cluster.mean(axis=0)  # make com to be 0
         rg_tensor = p_cluster.T.dot(p_cluster) / p_cluster.shape[0]
