@@ -4,6 +4,9 @@ from utils import get_from_cell
 import numpy as np
 
 
+# TODO: different cluster methods.
+
+
 def pbc(p, d):
     return p - d * np.round(p / d)
 
