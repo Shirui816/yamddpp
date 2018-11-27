@@ -45,7 +45,7 @@ def mat_ac(x, axes=None):
         return ifft(abs(fft(x, axis=0, n=s)) ** 2,
                     axis=0, n=s)[:n].real / norm
     else:
-        axes = np.asarray(np.atleast_1d(axes), dtype=np.int)
+        axes = np.atleast_1d(np.asarray(axes, dtype=np.int))
         if 0 in axes:
             raise ValueError("The 1st axis should be time axis!")
         norm = norm.reshape(n, *[1] * (x.ndim - 1 - axes.size))
