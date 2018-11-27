@@ -33,7 +33,7 @@ def handle_clusters(clusters, pos, types, box, bins=50):
                                zip(p_cluster.T, percolate)])  # using midpoint=True if not percolate, else com
         # calculate in each dimension, faster.
         p_cluster = pbc(p_cluster - midpoint, box)  # always in (midpoint-box/2, midpoint+box/2)
-        p_cluster -= p_cluster.mean(axis=0)  # make com to be 0
+        p_cluster -= p_cluster.mean(axis=0)  # make com be 0
         rg_tensor = p_cluster.T.dot(p_cluster) / p_cluster.shape[0]
         e, v = np.linalg.eig(rg_tensor)
         meta.write(fmt % (i, p_cluster.shape[0], e[0], e[1], e[2],
