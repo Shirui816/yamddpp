@@ -33,6 +33,32 @@ def pbc_pairwise_distance(x, y, box, ret):
 
 @cuda.jit('void(float64[:,:], float64[:], float64[:])')
 def pbc_pdist(x, box, ret):
+    r"""pdist gpu ver with pbc distance metric.
+
+    In [1]: k = 0
+
+    In [2]: m = 5
+
+    In [3]: for i in range(m-1):
+        ...:     for j in range(i+1, m):
+        ...:         k += 1
+        ...:         print(k, i, j, i*m+j-(i+1)*i/2-i)
+    1 0 1 1.0
+    2 0 2 2.0
+    3 0 3 3.0
+    4 0 4 4.0
+    5 1 2 5.0
+    6 1 3 6.0
+    7 1 4 7.0
+    8 2 3 8.0
+    9 2 4 9.0
+    10 3 4 10.0
+
+    :param x: np.ndarray, (n_coordinates, n_dimensions)
+    :param box: np.ndarray, (n_dimensions,)
+    :param ret: np.ndarray, see `scipy.spatial.distance.pdist` with nC2 elements.
+    :return:
+    """
     i = cuda.grid(1)
     if i >= x.shape[0] - 1:
         return
