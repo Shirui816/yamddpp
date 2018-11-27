@@ -25,9 +25,13 @@ def handle_clusters(clusters, pos, types, box, bins=50):
         percolate = np.asarray(
             [np.all(np.histogram(_, bins=bins, range=(-__ / 2, __ / 2))[0] > 0) for _, __ in zip(p_cluster.T, box)],
             dtype=np.bool)
-        center_of_mass = com(p_cluster, box / 2, -box / 2)
-        midpoint = com(p_cluster, box / 2, -box / 2, midpoint=True)
-        midpoint[percolate] = center_of_mass[percolate]  # using midpoint if not percolate, else center of mass
+        percolate = np.logical_not(percolate)  # midpoint=True for not percolate
+        # center_of_mass = com(p_cluster, box / 2, -box / 2)
+        # midpoint = com(p_cluster, box / 2, -box / 2, midpoint=True)
+        # midpoint[percolate] = center_of_mass[percolate]  # using midpoint if not percolate, else center of mass
+        midpoint = np.asarray([com(coors, box / 2, -box / 2, midpoint=percolate_p) for coors, percolate_p in
+                               zip(p_cluster.T, percolate)])  # using midpoint=True if not percolate, else com
+        # calculate in each dimension, faster.
         p_cluster = pbc(p_cluster - midpoint, box)  # always in (midpoint-box/2, midpoint+box/2)
         p_cluster -= p_cluster.mean(axis=0)  # make com to be 0
         rg_tensor = p_cluster.T.dot(p_cluster) / p_cluster.shape[0]
@@ -41,7 +45,7 @@ def handle_clusters(clusters, pos, types, box, bins=50):
         for __, _ in zip(p_types, p_cluster):
             xyz.write('%s %.4f %.4f %.4f\n' % (__, _[0], _[1], _[2]))
         xyz.close()
-    meta.close()
+        meta.close()
 
 
 def coarse_grained_cluster(pos, box, func, kwargs=None, r_cut=0):
