@@ -23,8 +23,9 @@ def handle_clusters(clusters, pos, types, box, bins=50):
         p_cluster = pos[cluster]
         p_types = types[cluster]
         percolate = np.asarray(
-            [np.all(np.histogram(_, bins=bins, range=(-__ / 2, __ / 2))[0] > 0) for _, __ in zip(p_cluster.T, box)],
-            dtype=np.bool)
+            [np.all(np.histogram(_, bins=bins, range=(-__ / 2, __ / 2))[0] > 0)
+             for _, __ in zip(p_cluster.T, box)], dtype=np.bool
+        )
         # center_of_mass = com(p_cluster, box / 2, -box / 2)
         # midpoint = com(p_cluster, box / 2, -box / 2, midpoint=True)
         # midpoint[percolate] = center_of_mass[percolate]  # using midpoint if not percolate, else center of mass
