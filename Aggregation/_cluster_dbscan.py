@@ -31,6 +31,17 @@ def pbc_pairwise_distance(x, y, box, ret):
     ret[i, j] = r
 
 
+@cuda.jit('void(float64[:,:], float64[:], float64[:])')
+def pbc_pdist(x, box, ret):
+    i = cuda.grid(1)
+    if i >= x.shape[0] - 1:
+        return
+    for j in range(i + 1, x.shape[0]):
+        r = pbc_dist_cu(x[i], x[j], box)
+        ret[int(i * x.shape[0] + j - (i + 1) * i / 2 - i - 1)] = r
+        # u_tri matrix, remove (i+1)i/2+i elements for the ith row.
+
+
 def cluster(pos, box, weights=None, epsilon=1.08,
             minpts=5, gpu=0):  # these parameters are suitable for dpd with density = 3.0
     r"""
@@ -54,5 +65,3 @@ def cluster(pos, box, weights=None, epsilon=1.08,
     #            for _ in list(set(db_fitted.labels_)) if _ != -1]
     # noises = pos[db_fitted.labels_ == -1]
     return db_fitted.labels_
-
-
