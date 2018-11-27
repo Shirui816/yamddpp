@@ -25,10 +25,10 @@ def handle_clusters(clusters, pos, types, box, bins=50):
         percolate = np.asarray(
             [np.all(np.histogram(_, bins=bins, range=(-__ / 2, __ / 2))[0] > 0) for _, __ in zip(p_cluster.T, box)],
             dtype=np.bool)
-        percolate = np.logical_not(percolate)  # midpoint=True for not percolate
         # center_of_mass = com(p_cluster, box / 2, -box / 2)
         # midpoint = com(p_cluster, box / 2, -box / 2, midpoint=True)
         # midpoint[percolate] = center_of_mass[percolate]  # using midpoint if not percolate, else center of mass
+        percolate = np.logical_not(percolate)  # midpoint=True for not percolate
         midpoint = np.asarray([com(coors, box / 2, -box / 2, midpoint=percolate_p) for coors, percolate_p in
                                zip(p_cluster.T, percolate)])  # using midpoint=True if not percolate, else com
         # calculate in each dimension, faster.
