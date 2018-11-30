@@ -33,8 +33,10 @@ def handle_clusters(clusters, pos, types, box, bins=50):
         # midpoint = com(p_cluster, box / 2, -box / 2, midpoint=True)
         # midpoint[percolate] = center_of_mass[percolate]  # using midpoint if not percolate, else center of mass
         percolate = np.logical_not(percolate)  # midpoint=True if percolate == False
-        midpoint = np.asarray([com(coors, box / 2, -box / 2, midpoint=percolate_p) for coors, percolate_p in
-                               zip(p_cluster.T, percolate)])  # using midpoint=True if not percolate, else com
+        midpoint = np.asarray(
+            [com(coors, l / 2, -l / 2, midpoint=percolate_p) for coors, l, percolate_p
+             in zip(p_cluster.T, box, percolate)]
+        )  # using midpoint=True if not percolate, else com
         # calculate in each dimension, faster.
         p_cluster = pbc(p_cluster - midpoint, box)  # always in (midpoint-box/2, midpoint+box/2)
         p_cluster -= p_cluster.mean(axis=0)  # make com be 0
