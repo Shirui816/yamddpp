@@ -7,12 +7,12 @@ from utils import hist_vec_by_r
 from utils import hist_vec_by_r_cu
 
 
-def scatter_xy(x, y=None, x_range=None, bins=None, q_bin=0.1, q_max=6.3, zero_padding=1, expand=0, use_gpu=False):
+def scatter_xy(x, y=None, x_range=None, r_cut=0.5, q_bin=0.1, q_max=6.3, zero_padding=1, expand=0, use_gpu=False):
     r"""Calculate static structure factor.
     :param x: np.ndarray, coordinates of component 1
     :param y: np.ndarray, coordinates of component 2
     :param x_range: np.ndarray, range of positions
-    :param bins: np.ndarray or int, bins in calculation of density matrix
+    :param r_cut: double, bin size of rho
     :param q_bin: double, bin size of wave vector q
     :param q_max: double, max value of wave vector q
     :param zero_padding: int (periods), whether pad density matrix with 0
@@ -21,7 +21,8 @@ def scatter_xy(x, y=None, x_range=None, bins=None, q_bin=0.1, q_max=6.3, zero_pa
     :return: np.ndarray, S(q) value
     """
     mode = 'ab' if x is not y else 'aa'
-    bins = np.asarray(bins)
+    box = np.array(np.array([_[1] - _[0] for _ in x_range]))
+    bins = np.asarray(box / r_cut, dtype=np.int)
     x_range = np.asarray(x_range)
     expand = np.asarray(expand)
     n_dim = x.shape[1]
@@ -51,12 +52,12 @@ def scatter_xy(x, y=None, x_range=None, bins=None, q_bin=0.1, q_max=6.3, zero_pa
     flip_axes = tuple(range(n_dim - 1))
     # fftn(a) = np.concatenate([rfftn(a),
     # conj(rfftn(a))[-np.arange(i),-np.arange(j)...,np.arange(k-k//2-1,0,-1)]], axis=-1)
+    # numpy >= 1.15
     _sq_xy = np.concatenate([_rft_sq_xy, np.flip(np.pad(_rft_sq_xy.conj(), pad_axes, 'wrap'),
                                                  axis=flip_axes)[fslice][..., lslice]], axis=-1)
     if not mode == 'ab':
         _sq_xy = _sq_xy.real
     # np.fft.rfftfreq does not work here, must use complete fft result.
-    box = np.array(np.array([_[1] - _[0] for _ in x_range]))
     _d = box / bins
     q = np.vstack([np.fft.fftfreq(_sq_xy.shape[_], _d[_]) for _ in range(_d.shape[0])])
     q = q * 2 * np.pi

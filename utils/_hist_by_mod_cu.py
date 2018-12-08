@@ -51,6 +51,7 @@ def _cu_kernel(x, r, r_bin, r_max2, ret, cter):
         cuda.atomic.add(cter, jdx, 1)
 
 
+# TODO: complex version is not correct
 @cuda.jit  # x, y can be arrays of any dimension
 def _cu_kernel_complex(x, y, r, r_bin, r_max2, ret_real, ret_imag, cter):
     i = cuda.grid(1)
