@@ -84,13 +84,13 @@ def hist_vec_by_r_cu(x, r, r_bin, r_max, gpu=0):
     ret = np.zeros(int(r_max / r_bin) + 1, dtype=np.float)
     cter = np.zeros(ret.shape, dtype=np.uint32)
     x = x.ravel(order='F')
-    y = x.imag
-    x = x.real
     with cuda.gpus[gpu]:
         device = cuda.get_current_device()
         tpb = device.WARP_SIZE
         bpg = int(np.ceil(x.shape[0] / tpb))
         if np.issubdtype(x.dtype, np.complex):
+            y = x.imag
+            x = x.real
             ret_imag = np.zeros(int(r_max / r_bin) + 1, dtype=np.float)
             _cu_kernel_complex[bpg, tpb](x, y, r, r_bin, r_max2, ret, ret_imag, cter)
             ret = ret + ret_imag * 1j
