@@ -2,9 +2,7 @@ from numba import cuda
 import numpy as np
 import math
 
-__doc__ = r"""
-Mutual mean square displacements: \sum_{ij}\langle|r_i(t)-r_j(0)|^2\rangle
-"""
+# Mutual mean square displacements: \sum_{ij}\langle|r_i(t)-r_j(0)|^2\rangle
 
 
 @cuda.jit("float64(float64[:], float64[:])", device=True)
