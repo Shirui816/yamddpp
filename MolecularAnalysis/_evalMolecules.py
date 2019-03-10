@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# -*- coding:utf-8 -*- 
-# Author: shirui <shirui816@gmail.com>
-
-
 def grab_iter_dual(i, bond_hash, mol_used, body_hash=None):
     s = [i]
     r = []

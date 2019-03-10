@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# -*- coding:utf-8 -*- 
-# Author: shirui <shirui816@gmail.com>
-
-
 def classify_isomers(molecular_types_list, isomer_hash):
     used_hash = {}
     mols = len(molecular_types_list)
