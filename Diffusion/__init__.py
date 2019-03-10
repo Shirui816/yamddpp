@@ -25,8 +25,8 @@ def traj_dcd(dcd_file, func=msd, cum=True):
     _shape = (n_frames,) if cum else (n_frames, n_samples)
     ret = np.zeros(_shape)
     counter = 0
-    for i in range(n_buffer):
-        x = np.asarray([np.copy(_[counter:counter + _BUFFER]) for _ in dcd])
+    for _ in range(n_buffer):
+        x = np.asarray([np.copy(frame[counter:counter + _BUFFER]) for frame in dcd])
         x = np.asarray(x, dtype=np.float64)  # float64 is needed for accuracy, for simpletraj
         # gives np.float32 in reading hoomd dcd file.
         counter += _BUFFER
