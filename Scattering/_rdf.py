@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-# -*- coding:utf-8 -*- 
-# Author: shirui <shirui816@gmail.com>
-
 import numpy as np
 from utils import hist_vec_by_r
 from utils import hist_vec_by_r_cu

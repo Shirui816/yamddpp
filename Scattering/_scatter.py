@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-# -*- coding:utf-8 -*- 
-# Author: shirui <shirui816@gmail.com>
-
 import numpy as np
 from utils import hist_vec_by_r
 from utils import hist_vec_by_r_cu
@@ -33,7 +29,7 @@ def scatter_xy(x, y=None, x_range=None, r_cut=0.5, q_bin=0.1, q_max=6.3, zero_pa
         bins = np.asarray([bins] * n_dim)
     if not (isinstance(use_gpu, bool) or isinstance(use_gpu, int)):
         raise ValueError("`use_gpu' should be bool or int!")
-    rho_x, edge = np.histogramdd(x, bins=bins, range=x_range)
+    rho_x, _ = np.histogramdd(x, bins=bins, range=x_range)
     if expand.ndim < 1:
         expand = np.asarray([expand] * rho_x.ndim)
     z_bins = (np.asarray(rho_x.shape) * zero_padding).astype(np.int64)
@@ -42,7 +38,7 @@ def scatter_xy(x, y=None, x_range=None, r_cut=0.5, q_bin=0.1, q_max=6.3, zero_pa
     # expand density with periodic data, enlarge sample periods.
     _rft_sq_y = _rft_sq_x
     if mode == 'ab':
-        rho_y, edge = np.histogramdd(y, bins=bins, range=x_range)
+        rho_y, _ = np.histogramdd(y, bins=bins, range=x_range)
         rho_y = np.pad(rho_y, [(0, _ * __) for _, __ in zip(rho_y.shape, expand)], 'wrap')
         _rft_sq_y = np.fft.rfftn(rho_y, s=z_bins)
     _rft_sq_xy = _rft_sq_x.conj() * _rft_sq_y  # circular correlation.

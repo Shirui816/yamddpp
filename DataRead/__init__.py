@@ -1,1 +1,1 @@
-from ._hoomdXml import HoomdXml
+# TODO: Need to re-define data structure.
