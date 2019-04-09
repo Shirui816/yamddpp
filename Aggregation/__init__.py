@@ -54,12 +54,12 @@ def handle_clusters(clusters, pos, types, box, bins=50):
         meta.close()
 
 
-def coarse_grained_cluster(pos, box, func, kwargs=None, r_cut=0):
+def coarse_grained_cluster(pos, box, method, kwargs=None, r_cut=0):
     r"""Cluster particles directly or cluster the cells to reduce calculation.
 
     :param pos: np.ndarray, positions
     :param box: np.ndarray, box
-    :param func: callable, clustering method
+    :param method: callable, clustering method
     :param kwargs: dictionary, args of func
     :param r_cut: float or np.ndarray, coarse-grain size, 0 for clustering directly.
     :return: list, clusters with particles ids.
@@ -67,7 +67,7 @@ def coarse_grained_cluster(pos, box, func, kwargs=None, r_cut=0):
     if kwargs is None:
         kwargs = {}
     if not r_cut:
-        return func(pos, box, **kwargs)
+        return method(pos, box, **kwargs)
     bins = np.asarray(box / r_cut, dtype=np.int)
     # weights, _ = np.histogramdd(pos, bins=bins, range=[(-_ / 2, _ / 2) for _ in box])
     # weights = weights.ravel(order='F')  # ravel in Fortran
@@ -75,7 +75,7 @@ def coarse_grained_cluster(pos, box, func, kwargs=None, r_cut=0):
     head, body, weights = linked_cl(pos, box, bins)  # weights was already raveled in Fortran way
     coordinates = np.vstack(np.unravel_index(np.arange(weights.shape[0]), bins, order='F')).T
     coordinates = coordinates * r_cut
-    fitted = func(coordinates, box, **kwargs)
+    fitted = method(coordinates, box, **kwargs)
     clusters = [np.arange(head.shape[0])[fitted == _]
                 for _ in list(set(fitted)) if _ != -1]  # cell-ids of cells in one cluster
     ret = []
