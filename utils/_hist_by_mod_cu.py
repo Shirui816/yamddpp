@@ -51,9 +51,8 @@ def _cu_kernel(x, r, r_bin, r_max2, ret, cter):
         cuda.atomic.add(cter, jdx, 1)
 
 
-# TODO: complex version is not correct, ambiguous array problem...
-@cuda.jit  # x, y can be arrays of any dimension
-def _cu_kernel_complex(x, y, r, r_bin, r_max2, ret_real, ret_imag, cter):
+@cuda.jit("void(complex128[:,:,:], float64[:,:], float64, float64, float64[:], float64[:], int64[:]")
+def _cu_kernel_complex(x, r, r_bin, r_max2, ret, ret_imag, cter):
     i = cuda.grid(1)
     if i >= x.shape[0]:
         return
@@ -65,8 +64,8 @@ def _cu_kernel_complex(x, y, r, r_bin, r_max2, ret_real, ret_imag, cter):
         tmp += r[k, idx] ** 2
     if tmp < r_max2:
         jdx = int(tmp ** 0.5 / r_bin)
-        cuda.atomic.add(ret_real, jdx, x[i])  # currently cuda.atomic.add does not support np.complex
-        cuda.atomic.add(ret_imag, jdx, y[i])
+        cuda.atomic.add(ret, jdx, x[i].real)  # currently cuda.atomic.add does not support np.complex
+        cuda.atomic.add(ret_imag, jdx, x[i].imag)
         cuda.atomic.add(cter, jdx, 1)
 
 
@@ -89,10 +88,8 @@ def hist_vec_by_r_cu(x, r, r_bin, r_max, gpu=0):
         tpb = device.WARP_SIZE
         bpg = int(np.ceil(x.shape[0] / tpb))
         if np.issubdtype(x.dtype, np.complex):
-            y = x.imag
-            x = x.real
             ret_imag = np.zeros(int(r_max / r_bin) + 1, dtype=np.float)
-            _cu_kernel_complex[bpg, tpb](x, y, r, r_bin, r_max2, ret, ret_imag, cter)
+            _cu_kernel_complex[bpg, tpb](x, r, r_bin, r_max2, ret, ret_imag, cter)
             ret = ret + ret_imag * 1j
         else:
             _cu_kernel[bpg, tpb](x, r, r_bin, r_max2, ret, cter)
