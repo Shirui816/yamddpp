@@ -1,6 +1,6 @@
 import numpy as np
 import warnings
-from . import _batch_dot
+from . import batch_dot
 
 
 def normal_modes(pos: np.ndarray, modes=None) -> np.ndarray:
