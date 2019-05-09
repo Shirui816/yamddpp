@@ -7,7 +7,7 @@ def pbc(r, d):
 
 
 def batchRgTensor(samples, boxes):
-    r"""Vectorized universal function.
+    r"""Batch calculation of Rg Tensors.
     :param samples: np.ndarray, (...,n_chains, n_monomers,n_dimensions)
     :param boxes: np.ndarray, (...,n_dimensions)
     :return: np.ndarray ret.
