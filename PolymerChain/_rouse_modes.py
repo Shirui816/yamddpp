@@ -1,25 +1,6 @@
-from numba import guvectorize
-from numba import float64
 import numpy as np
 import warnings
-
-
-@guvectorize([(float64[:, :], float64[:, :], float64[:, :])], '(n,p),(p,m)->(n,m)',
-             target='parallel')  # target='cpu','gpu'
-def _batch_dot(a, b, ret):  # much more faster than np.tensordot or np.einsum
-    r"""Vectorized universal function.
-    :param a: np.ndarray, factors with (n_modes, chain_length)
-    :param b: np.ndarray, positions with (..., chain_length, n_dimensions),
-    axes will be assigned automatically to last 2 axes due to the signatures.
-    :param ret: np.ndarray, results. (..., n_modes, n_dimensions)
-    :return: np.ndarray ret.
-    """
-    for i in range(ret.shape[0]):
-        for j in range(ret.shape[1]):
-            tmp = 0.
-            for k in range(a.shape[1]):
-                tmp += a[i, k] * b[k, j]
-            ret[i, j] = tmp
+from . import _batch_dot
 
 
 def normal_modes(pos: np.ndarray, modes=None) -> np.ndarray:
