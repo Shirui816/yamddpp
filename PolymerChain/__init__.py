@@ -1,7 +1,6 @@
-from ._rouse_modes import normal_modes
-# TODO: normal mode relaxation, CReTA
 from numba import float64
 from numba import guvectorize
+from ._rouse_modes import normal_modes
 
 
 @guvectorize([(float64[:, :], float64[:, :], float64[:, :])], '(n,p),(p,m)->(n,m)',
@@ -11,8 +10,9 @@ def batch_dot(a, b, ret):  # much more faster than np.tensordot or np.einsum
     :param a: np.ndarray, (...,N,P)
     :param b: np.ndarray, (...,P,M)
     axes will be assigned automatically to last 2 axes due to the signatures.
-    :param ret: np.ndarray, results. (...,N,M)
-    :return: np.ndarray ret.
+    this functions is actual np.einsum('...mp,....pn->...mn', a, b), or
+    np.matmul(a, b). But this is much faster.
+    :return: np.ndarray, results. (...,N,M)
     """
     for i in range(ret.shape[0]):
         for j in range(ret.shape[1]):
@@ -20,3 +20,5 @@ def batch_dot(a, b, ret):  # much more faster than np.tensordot or np.einsum
             for k in range(a.shape[1]):
                 tmp += a[i, k] * b[k, j]
         ret[i, j] = tmp
+
+# TODO: CReTA
