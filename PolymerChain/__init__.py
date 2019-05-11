@@ -1,7 +1,29 @@
 from numba import float64
 from numba import guvectorize
+from Aggregation import pbc
 from ._rouse_modes import normal_modes
 from ._rg_tensor import batchRgTensor
+
+
+def bondVecs(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
+    r"""Batch calculation of Rg Tensors.
+    :param samples: np.ndarray, (...,n_chains, n_monomers,n_dim)
+    e.g. (n_batch, n_frames, n_chains, n..., n_dim)
+    :param boxes: np.ndarray, (...,n_dimensions),
+    e.g. (n_batch, n_frames, n_dim)
+    :return: np.ndarray ret.
+    """
+    if samples.ndim == 2:
+        samples = np.expand_dims(samples, 0)
+    if samples.ndim < boxes.ndim + 2:
+        raise ValueError(
+            "Are you using multiple box values for an 1-frame sample?"
+        )
+    boxes = np.expand_dims(np.expand_dims(boxes, -2), -3)
+    bond_vecs = pbc(
+        np.diff(samples, axis=-2, prepend=samples[..., :1, :]), boxes
+    )
+    return bond_vecs
 
 
 @guvectorize([(float64[:, :], float64[:, :], float64[:, :])], '(n,p),(p,m)->(n,m)',
