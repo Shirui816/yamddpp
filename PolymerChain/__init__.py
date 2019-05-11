@@ -45,7 +45,7 @@ def batch_dot(a, b, ret):  # much more faster than np.tensordot or np.einsum
         ret[i, j] = tmp
 
 
-@guvectorize([(float64[:], float64[:], float64[:])],'(n),(n)->()')
+@guvectorize([(float64[:], float64[:], float64[:])],'(n),(n)->()', targer='parallel')
 def batch_inner_prod(a, b, ret):
 	tmp1 = tmp2 = tmp3 = 0
 	for i in range(a.shape[0]):
