@@ -1,6 +1,7 @@
 from numba import float64
 from numba import guvectorize
 from ._rouse_modes import normal_modes
+from ._rg_tensor import batchRgTensor
 
 
 @guvectorize([(float64[:, :], float64[:, :], float64[:, :])], '(n,p),(p,m)->(n,m)',
