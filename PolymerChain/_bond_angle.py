@@ -13,7 +13,9 @@ def bondAngles(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     """
     #bond_vecs = bondVecs(samples, boxes)
     bond_vecs = np.random
-    prod = np.einsum('...ij,...ij->...i', bond_vecs[..., 1:, :], bond_vecs[..., :-1, :])
+    prod = np.einsum(
+        '...ij,...ij->...i', bond_vecs[..., 1:, :], bond_vecs[..., :-1, :]
+    )
     norm = np.linalg.norm(bond_vecs, axis=-1)
     return np.arccos(np.clip(prod / norm[..., 1:] / norm[..., :-1], -1, 1))
     
