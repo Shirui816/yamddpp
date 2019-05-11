@@ -11,11 +11,12 @@ def bondAngles(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     :return: np.ndarray ret.
     """
     bond_vecs = bondVecs(samples, boxes)
+    # 1st bond vec is 0. Start from r2 - r1
     prod = np.einsum(
-        '...ij,...ij->...i', bond_vecs[..., :-1, :], bond_vecs[..., 1:, :]
+        '...ij,...ij->...i', bond_vecs[..., 1:-1, :], bond_vecs[..., 2:, :]
     )
     norm = np.linalg.norm(bond_vecs, axis=-1)
-    return np.arccos(np.clip(prod / norm[..., :-1] / norm[..., 1:], -1, 1))
+    return np.arccos(np.clip(prod / norm[..., 1:-1] / norm[..., 2:], -1, 1))
 
 
 def bondAngles_guv(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
@@ -28,5 +29,5 @@ def bondAngles_guv(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     This version should be faster. ^_^
     """
     bond_vecs = bondVecs(samples, boxes)
-    prod = batch_inner_prod(bond_vecs[..., :-1, :], bond_vecs[..., 1:, :])
+    prod = batch_inner_prod(bond_vecs[..., 1:-1, :], bond_vecs[..., 2:, :])
     return np.arccos(np.clip(prod, -1, 1))
