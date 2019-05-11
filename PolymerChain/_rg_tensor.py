@@ -15,12 +15,13 @@ def batchRgTensor(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
         samples = np.expand_dims(samples, 0)
     if samples.ndim < boxes.ndim + 2:
         raise ValueError(
-            "Are you using multiple box values for smaller dataset of samples?"
+            "Are you using multiple box values for an 1-frame sample?"
         )
     boxes = np.expand_dims(np.expand_dims(boxes, -2), -3)
     chain_length = samples.shape[-2]
-    samples = pbc(np.diff(samples, axis=-2), boxes).cumsum(axis=-2)
-    com = np.expand_dims(samples.sum(axis=-2) / chain_length, -2)
-    samples = np.append(-com, samples - com, axis=-2)
+    samples = pbc(
+        np.diff(samples, axis=-2, prepend=samples[...,:1,:]), boxes
+    ).cumsum(axis=-2)
+    samples -= np.expand_dims(samples.mean(axis=-2), -2)
     rgTensors = batch_dot(np.swapaxes(samples, -2, -1), samples) / chain_length
     return np.linalg.eigh(rgTensors)
