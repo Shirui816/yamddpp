@@ -18,4 +18,3 @@ def bondAngles(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     )
     norm = np.linalg.norm(bond_vecs, axis=-1)
     return np.arccos(np.clip(prod / norm[..., 1:] / norm[..., :-1], -1, 1))
-    
