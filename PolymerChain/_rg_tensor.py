@@ -24,4 +24,4 @@ def batchRgTensor(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     ).cumsum(axis=-2)
     samples -= np.expand_dims(samples.mean(axis=-2), -2)
     rgTensors = batch_dot(np.swapaxes(samples, -2, -1), samples) / chain_length
-    return np.linalg.eigh(rgTensors)
+    return rgTensors
