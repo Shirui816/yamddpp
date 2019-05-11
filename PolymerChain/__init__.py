@@ -44,4 +44,14 @@ def batch_dot(a, b, ret):  # much more faster than np.tensordot or np.einsum
                 tmp += a[i, k] * b[k, j]
         ret[i, j] = tmp
 
+
+@guvectorize([(float64[:], float64[:], float64[:])],'(n),(n)->()')
+def batch_inner_prod(a, b, ret):
+	tmp1 = tmp2 = tmp3 = 0
+	for i in range(a.shape[0]):
+		tmp1 += a[i] * b[i]
+		tmp2 += a[i] * a[i]
+		tmp3 += b[i] * b[i]
+	ret[0] = tmp1 / (tmp2 * tmp3) ** 0.5
+
 # TODO: CReTA
