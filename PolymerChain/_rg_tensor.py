@@ -1,6 +1,6 @@
 import numpy as np
 from . import batch_dot
-from . import bondVecs
+from . import bond_vecs
 
 
 def batch_rg_tensor(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
@@ -11,7 +11,7 @@ def batch_rg_tensor(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     e.g. (n_batch, n_frames, n_dim)
     :return: np.ndarray ret.
     """
-    samples = bondVecs(samples, boxes).cumsum(axis=-2)
+    samples = bond_vecs(samples, boxes).cumsum(axis=-2)
     samples -= np.expand_dims(samples.mean(axis=-2), -2)
     rg_tensors = batch_dot(np.swapaxes(samples, -2, -1), samples)
     return rg_tensors / samples.shape[-2]
