@@ -81,12 +81,12 @@ def coarse_grained_cluster(pos, box, method, kwargs=None, r_cut=0):
     fitted = method(coordinates, box, **kwargs)
     clusters = [np.arange(head.shape[0])[fitted == _]
                 for _ in list(set(fitted)) if _ != -1]  # cell-ids of cells in one cluster
-    ret = []
-    for cells in clusters:  # cluster consists of cells, for cluster in clusters
-        tmp = []
-        for cell in cells:  # for cell in a cluster of cells
-            tmp.extend(get_from_cell(cell, head, body))  # find particles ids in the cell and add to tmp
-        ret.append(tmp)
+    ret = [[_ for _ in (get_from_cell(cell, head, body) for cell in cells)] for cells in clusters]
+    # for cells in clusters:  # cluster consists of cells, for cluster in clusters
+    #    tmp = []
+    #    for cell in cells:  # for cell in a cluster of cells
+    #        tmp.extend(get_from_cell(cell, head, body))  # find particles ids in the cell and add to tmp
+    #    ret.append(tmp)
     return ret  # return the particle ids
 
 
