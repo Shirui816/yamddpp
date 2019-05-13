@@ -12,7 +12,7 @@ def bond_angles(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     :return: np.ndarray ret. (..., n_chains, chain_length - 2, n_dim)
     """
     bonds = bond_vecs(samples, boxes)
-    # 1st bond vec is 0. Start from r2 - r1
+    # 1st bond vec is 0. Angles start from r2 - r1
     prod = np.einsum(
         '...ij,...ij->...i', bonds[..., 1:-1, :], bonds[..., 2:, :]
     )
