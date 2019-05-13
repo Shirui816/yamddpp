@@ -28,8 +28,8 @@ def bond_vecs(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     )
 
 
-@guvectorize([(float64[:, :], float64[:, :], float64[:, :])], '(n,p),(p,m)->(n,m)',
-             target='parallel')  # target='cpu','gpu'
+@guvectorize([(float64[:, :], float64[:, :], float64[:, :])],
+             '(n,p),(p,m)->(n,m)', target='parallel')  # target='cpu','gpu'
 def batch_dot(a, b, ret):  # much more faster than np.tensordot or np.einsum
     r"""Vectorized universal function.
     :param a: np.ndarray, (...,N,P)
@@ -48,7 +48,8 @@ def batch_dot(a, b, ret):  # much more faster than np.tensordot or np.einsum
             ret[i, j] = tmp
 
 
-@guvectorize([(float64[:], float64[:], float64[:])], '(n),(n)->()', targer='parallel')
+@guvectorize([(float64[:], float64[:], float64[:])],
+             '(n),(n)->()', targer='parallel')
 def batch_inner_prod(a, b, ret):
     tmp1 = tmp2 = tmp3 = 0
     for i in range(a.shape[0]):
