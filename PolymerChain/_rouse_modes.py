@@ -65,8 +65,11 @@ def normal_modes(pos: np.ndarray, modes=None) -> np.ndarray:
         warnings.warn(
             "Please use UNWRAPPED coordinates to calculate the 0th mode!"
         )
-    factors = 1 / chain_length * np.asarray([
-        np.cos(p * np.pi / chain_length * (np.arange(1, chain_length + 1)))
-        for p in modes
-    ])
+    # factors = 1 / chain_length * np.asarray([
+    #    np.cos(p * np.pi / chain_length * (np.arange(1, chain_length + 1)))
+    #    for p in modes
+    # ])
+    factors = 1 / chain_length * np.cos(
+        np.expand_dims(modes, -1) * np.expand_dims(np.arange(1, chain_length + 1), 0) * np.pi / chain_length
+    )
     return batch_dot(factors, pos)
