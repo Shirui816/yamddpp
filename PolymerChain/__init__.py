@@ -3,8 +3,8 @@ from numba import guvectorize
 from Aggregation import pbc
 from ._rouse_modes import normal_modes
 from ._rg_tensor import batch_rg_tensor
-from ._bond_angle import bondAngles
-from ._bond_angle import bondAngles_guv
+from ._bond_angle import bond_angles
+from ._bond_angle import bond_angles_guv
 
 
 def bond_vecs(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
