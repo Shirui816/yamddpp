@@ -7,9 +7,15 @@ from pyculib.sorting import RadixSort
 
 @cuda.jit("uint32(float64[:], float64[:], uint32[:])", device=True)
 def cu_cell_id(p, box, ibox):
-    return floor((p[0] / box[0] + 0.5) * ibox[0]) + \
-           floor((p[1] / box[1] + 0.5) * ibox[1]) * ibox[0] + \
-           floor((p[2] / box[2] + 0.5) * ibox[2]) * ibox[1] * ibox[0]
+    ret = floor((p[0] / box[0] + 0.5) * ibox[0])
+    tmp = ibox[0]
+    for i in range(1, p.shape[0]):
+        ret += floor((p[i] / box[i] + 0.5) * ibox[i]) * tmp
+        tmp *= ibox[i]
+    return ret
+    # return floor((p[0] / box[0] + 0.5) * ibox[0]) + \
+    # floor((p[1] / box[1] + 0.5) * ibox[1]) * ibox[0] + \
+    # floor((p[2] / box[2] + 0.5) * ibox[2]) * ibox[1] * ibox[0]
     # +0.5 for 0 is at center of box.
     # unravel in Fortran way.
 
