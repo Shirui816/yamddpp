@@ -69,7 +69,8 @@ def normal_modes(pos: np.ndarray, modes=None) -> np.ndarray:
     #    np.cos(p * np.pi / chain_length * (np.arange(1, chain_length + 1)))
     #    for p in modes
     # ])
+    s = np.expand_dims(np.arange(1, chain_length + 1), 0) * np.pi / chain_length
     factors = 1 / chain_length * np.cos(
-        np.expand_dims(modes, -1) * np.expand_dims(np.arange(1, chain_length + 1), 0) * np.pi / chain_length
+        np.expand_dims(modes, -1) * s
     )
     return batch_dot(factors, pos)
