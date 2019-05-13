@@ -2,16 +2,19 @@ from numba import float64
 from numba import guvectorize
 from Aggregation import pbc
 from ._rouse_modes import normal_modes
-from ._rg_tensor import batchRgTensor
+from ._rg_tensor import batch_rg_tensor
+from ._bond_angle import bondAngles
+from ._bond_angle import bondAngles_guv
 
 
-def bondVecs(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
+def bond_vecs(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     r"""Batch calculation of Rg Tensors.
     :param samples: np.ndarray, (...,n_chains, n_monomers,n_dim)
     e.g. (n_batch, n_frames, n_chains, n..., n_dim)
     :param boxes: np.ndarray, (...,n_dimensions),
     e.g. (n_batch, n_frames, n_dim)
-    :return: np.ndarray ret.
+    :return: np.ndarray ret. (..., n_chains, chain_length, n_dim) with
+    (0, ...) for the 1st monomer on each chain.
     """
     if samples.ndim == 2:
         samples = np.expand_dims(samples, 0)
@@ -20,10 +23,9 @@ def bondVecs(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
             "Are you using multiple box values for an 1-frame sample?"
         )
     boxes = np.expand_dims(np.expand_dims(boxes, -2), -3)
-    bond_vecs = pbc(
+    return pbc(
         np.diff(samples, axis=-2, prepend=samples[..., :1, :]), boxes
     )
-    return bond_vecs
 
 
 @guvectorize([(float64[:, :], float64[:, :], float64[:, :])], '(n,p),(p,m)->(n,m)',
@@ -35,6 +37,7 @@ def batch_dot(a, b, ret):  # much more faster than np.tensordot or np.einsum
     axes will be assigned automatically to last 2 axes due to the signatures.
     this functions is actual np.einsum('...mp,....pn->...mn', a, b), or
     np.matmul(a, b). But this is much faster.
+    :param ret: np.ndarray, generated automatically by guvectorize
     :return: np.ndarray, results. (...,N,M)
     """
     for i in range(ret.shape[0]):
@@ -45,13 +48,13 @@ def batch_dot(a, b, ret):  # much more faster than np.tensordot or np.einsum
         ret[i, j] = tmp
 
 
-@guvectorize([(float64[:], float64[:], float64[:])],'(n),(n)->()', targer='parallel')
+@guvectorize([(float64[:], float64[:], float64[:])], '(n),(n)->()', targer='parallel')
 def batch_inner_prod(a, b, ret):
-	tmp1 = tmp2 = tmp3 = 0
-	for i in range(a.shape[0]):
-		tmp1 += a[i] * b[i]
-		tmp2 += a[i] * a[i]
-		tmp3 += b[i] * b[i]
-	ret[0] = tmp1 / (tmp2 * tmp3) ** 0.5
+    tmp1 = tmp2 = tmp3 = 0
+    for i in range(a.shape[0]):
+        tmp1 += a[i] * b[i]
+        tmp2 += a[i] * a[i]
+        tmp3 += b[i] * b[i]
+    ret[0] = tmp1 / (tmp2 * tmp3) ** 0.5
 
 # TODO: CReTA

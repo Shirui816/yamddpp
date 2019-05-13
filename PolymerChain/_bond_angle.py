@@ -1,33 +1,34 @@
-from . import bondVecs
+from . import bond_vecs
 from . import batch_inner_prod
 import numpy as np
 
-def bondAngles(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
+
+def bond_angles(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     r"""Batch calculation of Rg Tensors.
     :param samples: np.ndarray, (...,n_chains, n_monomers,n_dim)
     e.g. (n_batch, n_frames, n_chains, n..., n_dim)
     :param boxes: np.ndarray, (...,n_dimensions),
     e.g. (n_batch, n_frames, n_dim)
-    :return: np.ndarray ret.
+    :return: np.ndarray ret. (..., n_chains, chain_length - 2, n_dim)
     """
-    bond_vecs = bondVecs(samples, boxes)
+    bonds = bond_vecs(samples, boxes)
     # 1st bond vec is 0. Start from r2 - r1
     prod = np.einsum(
-        '...ij,...ij->...i', bond_vecs[..., 1:-1, :], bond_vecs[..., 2:, :]
+        '...ij,...ij->...i', bonds[..., 1:-1, :], bonds[..., 2:, :]
     )
-    norm = np.linalg.norm(bond_vecs, axis=-1)
+    norm = np.linalg.norm(bonds, axis=-1)
     return np.arccos(np.clip(prod / norm[..., 1:-1] / norm[..., 2:], -1, 1))
 
 
-def bondAngles_guv(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
+def bond_angles_guv(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     r"""Batch calculation of Rg Tensors.
     :param samples: np.ndarray, (...,n_chains, n_monomers,n_dim)
     e.g. (n_batch, n_frames, n_chains, n..., n_dim)
     :param boxes: np.ndarray, (...,n_dimensions),
     e.g. (n_batch, n_frames, n_dim)
-    :return: np.ndarray ret.
+    :return: np.ndarray ret. (..., n_chains, chain_length - 2, n_dim)
     This version should be faster. ^_^
     """
-    bond_vecs = bondVecs(samples, boxes)
-    prod = batch_inner_prod(bond_vecs[..., 1:-1, :], bond_vecs[..., 2:, :])
+    bonds = bond_vecs(samples, boxes)
+    prod = batch_inner_prod(bonds[..., 1:-1, :], bonds[..., 2:, :])
     return np.arccos(np.clip(prod, -1, 1))
