@@ -2,6 +2,8 @@ from ._com import com
 from utils import linked_cl
 from utils import get_from_cell
 from numba import cuda
+from numba import vectorize
+from numba import guvectorize
 from math import floor, sqrt, ceil
 from ._cluster_dbscan import cluster as method_dbscan
 import numpy as np
