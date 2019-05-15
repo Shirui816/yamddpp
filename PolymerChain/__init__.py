@@ -8,7 +8,7 @@ from ._bond_angle import bond_angles_guv
 
 
 def bond_vecs(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
-    r"""Batch calculation of Rg Tensors.
+    r"""Batch calculation of bond vectors of linear polymers
     :param samples: np.ndarray, (...,n_chains, n_monomers,n_dim)
     e.g. (n_batch, n_frames, n_chains, n..., n_dim)
     :param boxes: np.ndarray, (...,n_dimensions),
