@@ -20,8 +20,8 @@ def bond_angles(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     return np.arccos(np.clip(prod / norm[..., 1:-1] / norm[..., 2:], -1, 1))
 
 
-def bond_angles_guv(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
-    r"""Batch calculation of bond angles of linear polymers.
+def bond_angles_ufunc(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
+    r"""Batch calculation of bond angles of linear polymers. Using ufunc to accelerate.
     :param samples: np.ndarray, (...,n_chains, n_monomers,n_dim)
     e.g. (n_batch, n_frames, n_chains, n..., n_dim)
     :param boxes: np.ndarray, (...,n_dimensions),
