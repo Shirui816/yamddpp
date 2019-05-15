@@ -4,7 +4,7 @@ import numpy as np
 
 
 def bond_angles(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
-    r"""Batch calculation of Rg Tensors.
+    r"""Batch calculation of bond angles of linear polymers.
     :param samples: np.ndarray, (...,n_chains, n_monomers,n_dim)
     e.g. (n_batch, n_frames, n_chains, n..., n_dim)
     :param boxes: np.ndarray, (...,n_dimensions),
@@ -21,7 +21,7 @@ def bond_angles(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
 
 
 def bond_angles_guv(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
-    r"""Batch calculation of Rg Tensors.
+    r"""Batch calculation of bond angles of linear polymers.
     :param samples: np.ndarray, (...,n_chains, n_monomers,n_dim)
     e.g. (n_batch, n_frames, n_chains, n..., n_dim)
     :param boxes: np.ndarray, (...,n_dimensions),
