@@ -10,6 +10,12 @@ import numpy as np
 # TODO: different cluster methods.
 
 
+@vectorize([('float64(float64, float64)')], target='parallel') # gpu, cpu
+def pbc_vec(r, d):
+    return r - d * floor(r / d + 0.5)
+# faster than pbc defined below
+
+
 def pbc(p, d):
     return p - d * np.round(p / d)
 
