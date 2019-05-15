@@ -13,7 +13,7 @@ import numpy as np
 
 
 @vectorize([('float64(float64, float64)')], target='parallel') # gpu, cpu
-def pbc_vec(r, d):
+def pbc_ufunc(r, d):
     return r - d * floor(r / d + 0.5)
 # faster than pbc defined below
 
