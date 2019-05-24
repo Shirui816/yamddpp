@@ -49,8 +49,11 @@ def scatter_xy(x, y=None, x_range=None, r_cut=0.5, q_bin=0.1, q_max=6.3, zero_pa
     # fftn(a) = np.concatenate([rfftn(a),
     # conj(rfftn(a))[-np.arange(i),-np.arange(j)...,np.arange(k-k//2-1,0,-1)]], axis=-1)
     # numpy >= 1.15
-    _sq_xy = np.concatenate([_rft_sq_xy, np.flip(np.pad(_rft_sq_xy.conj(), pad_axes, 'wrap'),
-                                                 axis=flip_axes)[fslice][..., lslice]], axis=-1)
+    _sq_xy = np.concatenate(
+        [_rft_sq_xy, np.flip(
+            np.pad(_rft_sq_xy.conj(), pad_axes, 'wrap'), axis=flip_axes
+        )[fslice][..., lslice]],
+        axis=-1)
     if not mode == 'ab':
         _sq_xy_real = _sq_xy.real
         # _sq_xy_imag = np.copy(_sq_xy.imag) # TODO: use 2 real arrays to calculate SQ_real+1j*SQ_imag
