@@ -52,7 +52,7 @@ def _cu_kernel(x, r, r_bin, r_max2, ret, cter):
 
 
 @cuda.jit("void(complex128[:,:,:], float64[:,:], float64, float64, float64[:], float64[:], int64[:]")
-def _cu_kernel_complex(x, r, r_bin, r_max2, ret, ret_imag, cter):
+def _cu_kernel_complex(x_real, x_imag, r, r_bin, r_max2, ret, ret_imag, cter):
     i = cuda.grid(1)
     if i >= x.shape[0]:
         return
@@ -64,8 +64,8 @@ def _cu_kernel_complex(x, r, r_bin, r_max2, ret, ret_imag, cter):
         tmp += r[k, idx] ** 2
     if tmp < r_max2:
         jdx = int(tmp ** 0.5 / r_bin)
-        cuda.atomic.add(ret, jdx, x[i].real)  # currently cuda.atomic.add does not support np.complex
-        cuda.atomic.add(ret_imag, jdx, x[i].imag)
+        cuda.atomic.add(ret, jdx, x_real[i])  # currently cuda.atomic.add does not support np.complex
+        cuda.atomic.add(ret_imag, jdx, x_imag[i])
         cuda.atomic.add(cter, jdx, 1)
 
 
@@ -88,8 +88,10 @@ def hist_vec_by_r_cu(x, r, r_bin, r_max, gpu=0):
         tpb = device.WARP_SIZE
         bpg = int(np.ceil(x.shape[0] / tpb))
         if np.issubdtype(x.dtype, np.complex):
+            x_real = np.ascontiguousarray(x.real)
+            x_imag = np.ascontiguousarray(x.imag)
             ret_imag = np.zeros(int(r_max / r_bin) + 1, dtype=np.float)
-            _cu_kernel_complex[bpg, tpb](x, r, r_bin, r_max2, ret, ret_imag, cter)
+            _cu_kernel_complex[bpg, tpb](x_real, x_imag, r, r_bin, r_max2, ret, ret_imag, cter)
             ret = ret + ret_imag * 1j
         else:
             _cu_kernel[bpg, tpb](x, r, r_bin, r_max2, ret, cter)

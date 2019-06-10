@@ -34,6 +34,9 @@ def scatter_xy(x, y=None, x_range=None, r_cut=0.5, q_bin=0.1, q_max=6.3, zero_pa
         expand = np.asarray([expand] * rho_x.ndim)
     z_bins = (np.asarray(rho_x.shape) * zero_padding).astype(np.int64)
     rho_x = np.pad(rho_x, [(0, _ * __) for _, __ in zip(rho_x.shape, expand)], 'wrap')
+    z_bins = np.where(
+        z_bins > np.asarray(rho_x.shape[0]), z_bins, np.asarray(rho_x.shape[0])
+    )
     _rft_sq_x = np.fft.rfftn(rho_x, s=z_bins)
     # expand density with periodic data, enlarge sample periods.
     _rft_sq_y = _rft_sq_x
@@ -52,11 +55,8 @@ def scatter_xy(x, y=None, x_range=None, r_cut=0.5, q_bin=0.1, q_max=6.3, zero_pa
     _sq_xy = np.concatenate(
         [_rft_sq_xy, np.flip(
             np.pad(_rft_sq_xy.conj(), pad_axes, 'wrap'), axis=flip_axes
-        )[fslice][..., lslice]],
-        axis=-1)
-    if not mode == 'ab':
-        _sq_xy_real = _sq_xy.real
-        # _sq_xy_imag = np.copy(_sq_xy.imag) # TODO: use 2 real arrays to calculate SQ_real+1j*SQ_imag
+        )[fslice][..., lslice]], axis=-1
+    )
     # np.fft.rfftfreq does not work here, must use complete fft result.
     _d = box / bins
     q = np.vstack([np.fft.fftfreq(_sq_xy.shape[_], _d[_]) for _ in range(_d.shape[0])])
