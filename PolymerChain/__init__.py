@@ -1,3 +1,4 @@
+import numpy as np
 from numba import float64
 from numba import guvectorize
 from Aggregation import pbc
