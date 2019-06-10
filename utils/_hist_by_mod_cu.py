@@ -54,7 +54,7 @@ def _cu_kernel(x, r, r_bin, r_max2, ret, cter):
 @cuda.jit("void(complex128[:,:,:], float64[:,:], float64, float64, float64[:], float64[:], int64[:]")
 def _cu_kernel_complex(x_real, x_imag, r, r_bin, r_max2, ret, ret_imag, cter):
     i = cuda.grid(1)
-    if i >= x.shape[0]:
+    if i >= x_real.shape[0]:
         return
     tmp = 0
     j = i
