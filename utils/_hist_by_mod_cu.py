@@ -77,7 +77,7 @@ def hist_vec_by_r_cu(x, r, r_bin, r_max, gpu=0):
     :param r_bin: double, bin size of r
     :param r_max: double, max of r
     :param gpu: int gpu number
-    :return: np.ndarray, averaged $F(x, y, ...) -> f(\sqrt{x^2+y^2+...})$
+    :return: np.ndarray, averaged $F(x, y, ...) -> 1/(4\pi\r^2) f(\sqrt{x^2+y^2+...})$
     """
     r_max2 = r_max ** 2
     ret = np.zeros(int(r_max / r_bin) + 1, dtype=np.float)
