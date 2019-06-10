@@ -57,7 +57,7 @@ def scatter_xy(x, y=None, x_range=None, r_cut=0.5, q_bin=0.1, q_max=6.3, zero_pa
             np.pad(_rft_sq_xy.conj(), pad_axes, 'wrap'), axis=flip_axes
         )[fslice][..., lslice]], axis=-1
     )
-    # np.fft.rfftfreq does not work here, must use complete fft result.
+    # np.fft.rfftfreq does not work here, it has be the complete fft result.
     _d = box / bins
     q = np.vstack([np.fft.fftfreq(_sq_xy.shape[_], _d[_]) for _ in range(_d.shape[0])])
     q = q * 2 * np.pi
