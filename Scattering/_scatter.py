@@ -29,7 +29,9 @@ def scatter_xy(x, y=None, x_range=None, r_cut=0.5, q_bin=0.1, q_max=6.3, zero_pa
     if bins.ndim < 1:
         bins = np.asarray([bins] * n_dim)
     if not (isinstance(use_gpu, bool) or isinstance(use_gpu, int)):
-        raise ValueError("`use_gpu' should be bool or int!")
+        raise ValueError(
+            "`use_gpu' should be bool: False for not using GPU or an integer of GPU id!"
+        )
     rho_x, _ = np.histogramdd(x, bins=bins, range=x_range)
     if expand.ndim < 1:
         expand = np.asarray([expand] * rho_x.ndim)
