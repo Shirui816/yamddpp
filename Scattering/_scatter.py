@@ -17,6 +17,7 @@ def scatter_xy(x, y=None, x_range=None, r_cut=0.5, q_bin=0.1, q_max=6.3, zero_pa
     :return: np.ndarray, S(q) value
     """
     mode = 'ab' if x is not y else 'aa'
+    # Using `x_range' rather than `box' for the unknown origin of the box
     box = np.array(np.array([_[1] - _[0] for _ in x_range]))
     bins = np.asarray(box / r_cut, dtype=np.int)
     x_range = np.asarray(x_range)
