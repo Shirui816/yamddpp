@@ -65,6 +65,7 @@ def cu_cell_list(pos, box, ibox, gpu=0):
         cell_counts = np.zeros(cell_id.max() + 1, dtype=np.uint32)
         cu_cell_count[bpg, tpb](cell_id, cell_counts)
     cell_counts = np.cumsum(cell_counts)
+    # cell_counts = np.r_[0, np.diff(np.flatnonzero(np.diff(cell_id)) + 1, prepend=0, append=cell_id.shape[0]).cumsum()]
     # cell_counts = cell_count(cell_id)
     return cell_list.astype(np.int64), cell_counts.astype(np.int64)
 
