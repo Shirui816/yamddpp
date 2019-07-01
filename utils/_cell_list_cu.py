@@ -29,12 +29,12 @@ def cu_cell_ind(pos, box, ibox, ret):
         ret[i] = ic
 
 
-def cell_count(cell_id):
+def cell_count(cell_id, n_cell):
     r"""
     :param cell_id: must be sorted.
     :return: cumsum of count of particles in cells.
     """
-    return np.append(0, np.cumsum(np.bincount(cell_id, minlength=cell_id.max() + 1)))
+    return np.append(0, np.cumsum(np.bincount(cell_id, minlength=n_cell)))
 
 
 @cuda.jit("void(uint32[:], uint32[:])")
@@ -63,7 +63,7 @@ def cu_cell_list(pos, box, ibox, gpu=0):
             cell_list = np.argsort(cell_id)
             cell_id = cell_id[cell_list]
         # cell_id.max() == np.multiply.reduce(ibox)
-        cell_counts = np.zeros(cell_id.max() + 1, dtype=np.uint32)
+        cell_counts = np.zeros(n_cell, dtype=np.uint32)
         cu_cell_count[bpg, tpb](cell_id, cell_counts)
     cell_counts = np.cumsum(cell_counts)
     # cell_counts = np.r_[0, np.diff(np.flatnonzero(np.diff(cell_id)) + 1, prepend=0, append=cell_id.shape[0]).cumsum()]
