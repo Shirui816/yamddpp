@@ -1,5 +1,6 @@
 from math import ceil
 
+import numba as nb
 import numpy as np
 from numba import cuda
 
