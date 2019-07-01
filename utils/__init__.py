@@ -1,10 +1,30 @@
+import numpy as np
+
+from ._cell_list import cell_id
+from ._cell_list import get_from_cell
+from ._cell_list import linked_cl
+from ._cell_list import unravel_index_f
+from ._cell_list_cu import cu_cell_list_argsort
 from ._hist_by_mod import hist_vec_by_r
 from ._hist_by_mod_cu import hist_vec_by_r_cu
-import numpy as np
-from ._cell_list import cell_id
-from ._cell_list import unravel_index_f
-from ._cell_list import linked_cl
-from ._cell_list import get_from_cell
+from ._cell_list_cu import cu_cell_id
+
+
+@cuda.jit("void(int64, int64[:], int64[:])", device=True)
+def unravel_index_f_cu(i, dim, ret):  # unravel index in Fortran way.
+    for k in range(dim.shape[0]):
+        ret[k] = int(i % dim[k])
+        i = (i - ret[k]) / dim[k]
+
+
+@cuda.jit("int64(int64[:], int64[:])", device=True)
+def ravel_index_f_cu(i, dim):  # ravel index in Fortran way.
+    ret = (i[0] + dim[0]) % dim[0]
+    tmp = dim[0]
+    for k in range(1, dim.shape[0]):
+        ret += ((i[k] + dim[k]) % dim[k]) * tmp
+        tmp *= dim[k]
+    return ret
 
 
 def rfft2fft(rfft, n):

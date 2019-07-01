@@ -10,7 +10,7 @@ def unravel_index_f_cu(i, dim, ret):  # unravel index in Fortran way.
         i = (i - ret[k]) / dim[k]
 
 
-def unravel_indices_f(dim, gpu=0):
+def _unravel_indices_f(dim, gpu=0):
     n_dim = dim.shape[0]
     n = np.multiply.reduce(dim)
     ret = np.zeros((n, n_dim), dtype=np.int64)

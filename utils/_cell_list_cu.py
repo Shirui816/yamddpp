@@ -47,6 +47,7 @@ def cu_cell_count(cell_id, ret):
 
 def cu_cell_list(pos, box, ibox, gpu=0):
     n = pos.shape[0]
+    n_cell = np.multiply.reduce(ibox)
     cell_id = np.zeros(n).astype(np.uint32)
     with cuda.gpus[gpu]:
         device = cuda.get_current_device()
@@ -68,6 +69,23 @@ def cu_cell_list(pos, box, ibox, gpu=0):
     # cell_counts = np.r_[0, np.diff(np.flatnonzero(np.diff(cell_id)) + 1, prepend=0, append=cell_id.shape[0]).cumsum()]
     # cell_counts = cell_count(cell_id)
     return cell_list.astype(np.int64), cell_counts.astype(np.int64)
+
+
+def cu_cell_list_argsort(pos, box, ibox, gpu=0):
+    n = pos.shape[0]
+    n_cell = np.multiply.reduce(ibox)
+    cell_id = np.zeros(n).astype(np.int64)
+    with cuda.gpus[gpu]:
+        device = cuda.get_current_device()
+        tpb = device.WARP_SIZE
+        bpg = ceil(n / tpb)
+        cu_cell_ind[bpg, tpb](pos, box, ibox, cell_id)
+    cell_list = np.argsort(cell_id)  # pyculib radixsort for cuda acceleration.
+    cell_id = cell_id[cell_list]
+    cell_counts = np.r_[0, np.cumsum(np.bincount(cell_id, minlength=n_cell))]
+    return cell_list.astype(np.int64), cell_counts.astype(np.int64)
+
+
 
 # calling: for a particle in nth cell, cell_count[n] gives the start index of
 # cell_list, and cell_count[n+1] gives the end index of cell_list.
