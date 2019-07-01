@@ -5,7 +5,7 @@ from math import ceil
 from pyculib.sorting import RadixSort
 
 
-@cuda.jit("uint32(float64[:], float64[:], uint32[:])", device=True)
+@cuda.jit("int64(float64[:], float64[:], int64[:])", device=True)
 def cu_cell_id(p, box, ibox):
     ret = floor((p[0] / box[0] + 0.5) * ibox[0])
     tmp = ibox[0]
@@ -20,7 +20,7 @@ def cu_cell_id(p, box, ibox):
     # unravel in Fortran way.
 
 
-@cuda.jit("void(float64[:, :], float64[:], uint32[:], uint32[:]")
+@cuda.jit("void(float64[:, :], float64[:], int64[:], int64[:]")
 def cu_cell_ind(pos, box, ibox, ret):
     i = cuda.grid(1)
     if i < pos.shape[0]:
@@ -37,7 +37,7 @@ def cell_count(cell_id, n_cell):
     return np.append(0, np.cumsum(np.bincount(cell_id, minlength=n_cell)))
 
 
-@cuda.jit("void(uint32[:], uint32[:])")
+@cuda.jit("void(int64[:], int64[:])")
 def cu_cell_count(cell_id, ret):
     i = cuda.grid(1)
     if i >= cell_id.shape[0]:
@@ -48,22 +48,22 @@ def cu_cell_count(cell_id, ret):
 def cu_cell_list(pos, box, ibox, gpu=0):
     n = pos.shape[0]
     n_cell = np.multiply.reduce(ibox)
-    cell_id = np.zeros(n).astype(np.uint32)
+    cell_id = np.zeros(n).astype(np.int64)
     with cuda.gpus[gpu]:
         device = cuda.get_current_device()
         tpb = device.WARP_SIZE
         bpg = ceil(n / tpb)
         cu_cell_ind[bpg, tpb](pos, box, ibox, cell_id)
         if np.multiply.reduce(ibox) >= 2e5:  # using cuda if n_cell larger than 2e5.
-            cell_list = np.arange(n).astype(np.uint32)
-            sorter = RadixSort(n, np.uint32)
+            cell_list = np.arange(n).astype(np.int64)
+            sorter = RadixSort(n, np.int64)
             sorter.sort(keys=cell_id, vals=cell_list)  # don't known why sorter with np.int64
             # gives strange results...
         else:
             cell_list = np.argsort(cell_id)
             cell_id = cell_id[cell_list]
         # cell_id.max() == np.multiply.reduce(ibox)
-        cell_counts = np.zeros(n_cell, dtype=np.uint32)
+        cell_counts = np.zeros(n_cell, dtype=np.int64)
         cu_cell_count[bpg, tpb](cell_id, cell_counts)
     cell_counts = np.cumsum(cell_counts)
     # cell_counts = np.r_[0, np.diff(np.flatnonzero(np.diff(cell_id)) + 1, prepend=0, append=cell_id.shape[0]).cumsum()]
