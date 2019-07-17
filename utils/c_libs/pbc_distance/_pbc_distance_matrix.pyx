@@ -30,7 +30,7 @@ def pdist_omp(double[:,:] x, double[:] box):
     s = n * (n - 1) / 2
     ret = np.zeros(s, dtype=np.float)
     with nogil, parallel():
-        for i in prange(n-1, schedule='dynamic'):
+        for i in prange(n-1, schedule='static'):
             for j in range(i + 1, n):
                 l = i * (n - 1) - i * (i + 1) / 2 + j - 1
                 ret[l] = pbc_dist(x[i], x[j], box)
