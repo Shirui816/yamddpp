@@ -19,3 +19,7 @@ def hist_vec_by_r(x, r, r_bin, r_max):
     return ret / cter
 
 # for datas of all dimensions. x.shape == (500, 500, 500), r.shape == (3, 500). ~ 2.05s
+# np.ndindex is in C order: ret
+#p,_ = np.histogram(np.linalg.norm(np.asarray(list(np.ndindex(a.shape))), axis=-1),bins=50,range=(0,5), weights=x.ravel('C'))
+# cter:
+#p,_ = np.histogram(np.linalg.norm(np.asarray(list(np.ndindex(a.shape))), axis=-1),bins=50,range=(0,5))
