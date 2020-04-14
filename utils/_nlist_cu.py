@@ -1,15 +1,17 @@
-from ._cell_list_cu import cu_cell_list
+from math import ceil
+
+import numba as nb
+import numpy as np
+from numba import cuda
+
 from ._cell_list_cu import cu_cell_id
+from ._cell_list_cu import cu_cell_list
+from ._utils import add_local_arr_mois_1
+from ._utils import cu_max_int, cu_mat_dot_v_pbc_dist
+from ._utils import cu_set_to_int
+from ._utils import pbc_dist_cu
 from ._utils import ravel_index_f_cu
 from ._utils import unravel_index_f_cu
-from ._utils import pbc_dist_cu
-from ._utils import add_local_arr_mois_1
-from ._utils import cu_set_to_int
-from ._utils import cu_max_int, cu_mat_dot_v_pbc_dist
-from numba import cuda
-import numpy as np
-import numba as nb
-from math import ceil
 
 
 def cu_nl(a, box, rc, nc_p=100, gpu=0):

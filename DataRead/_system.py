@@ -1,9 +1,11 @@
+from math import ceil
+
 import numpy as np
 from numba import cuda
-from math import ceil
+
 from utils import cu_cell_count, cu_cell_ind
-from utils import cu_nl_strain
 from utils import cu_max_int, cu_set_to_int
+from utils import cu_nl_strain
 
 
 class MDSystem(object):

@@ -1,6 +1,7 @@
-from numba import cuda
 from cmath import exp as cexp
 from math import sqrt, pi, fmod, gamma
+
+from numba import cuda
 
 
 @cuda.jit("float64(int64, int64, float64)", device=True)

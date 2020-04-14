@@ -1,8 +1,10 @@
-from numba import cuda
-import numba as np
-from utils import cu_nl
-import numba as nb
 from math import floor, atan2, sqrt, ceil, pi
+
+import numba as nb
+import numba as np
+from numba import cuda
+
+from utils import cu_nl
 from ._spherical_harmonics import sphHar
 
 
