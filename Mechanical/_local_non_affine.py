@@ -76,8 +76,8 @@ def local_non_affine_of_ab(sys_a, sys_b):
             a0, b0, sys_a.d_box, nl, nc, Xij, Yij, sys_a.d_strain, sys_b.d_strain
         )
         # XIY = np.matmul(Xij, np.linalg.inv(Yij))
-        Xij = d_Xij.copy_to_host()
-        Yij = d_Yij.copy_to_host()
+        d_Xij.copy_to_host(Xij)
+        d_Yij.copy_to_host(Yij)
         cuda.synchronize()
         XIY = np.matmul(Xij, np.linalg.pinv(Yij, hermitian=True))
         d_XIY = cuda.to_device(XIY)
