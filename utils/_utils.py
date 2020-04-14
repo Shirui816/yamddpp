@@ -3,6 +3,47 @@ from math import floor, sqrt
 import numba as np
 
 
+@cuda.jit("float64(float64[:,:], float64[:], float64[:], float64[:])", device=True)
+def cu_mat_dot_v_pbc_dist(a, b, c, box):
+    ret = 0
+    for i in range(a.shape[0]):
+        tmp = 0
+        for j in range(a.shape[1]):
+            dc = b[j] - c[j]
+            dc = dc - box[j] * floor(dc / box[j] + 0.5)
+            tmp += a[i, j] * dc
+        ret += tmp ** 2
+    return sqrt(ret)
+
+
+@cuda.jit("void(float64[:,:], float64[:], float64[:])", device=True)
+def cu_mat_dot_v(a, b, ret):
+    for i in range(a.shape[0]):
+        tmp = 0
+        for j in range(a.shape[1]):
+            tmp += a[i, j] * b[j]
+        ret[i] = tmp
+
+
+@cuda.jit("void(float64[:,:], float64[:], float64[:], float64[:], float64[:])", device=True)
+def cu_mat_dot_v_pbc(a, b, c, box, ret):
+    for i in range(a.shape[0]):
+        tmp = 0
+        for j in range(a.shape[1]):
+            dc = b[j] - c[j]
+            dc = dc - box[j] * floor(dc / box[j] + 0.5)
+            tmp += a[i, j] * dc
+        ret[i] = tmp
+
+
+@cuda.jit("float64(float64[:])", device=True)
+def cu_v_mod(r):
+    tmp = 0
+    for i in range(r.shape[0]):
+        tmp += r[i] ** 2
+    return sqrt(tmp)
+
+
 @cuda.jit('void(int64[:], int64)')
 def cu_set_to_int(arr, val):
     i = cuda.grid(1)
