@@ -3,9 +3,8 @@ from math import ceil
 import numpy as np
 from numba import cuda
 
-from utils import cu_cell_count, cu_cell_ind
+from utils import cu_cell_ind, cu_nl_strain
 from utils import cu_max_int, cu_set_to_int
-from utils import cu_nl_strain
 
 
 class MDSystem(object):
@@ -17,14 +16,16 @@ class MDSystem(object):
         self.time_step = int(ts)
         self.n_dim = x.shape[1]
         self.gpu = gpu
-        self.strain = np.asarray(strain, dtype=np.float64)
-        self._nc_p = 100
-        self.rc = rc
         if strain is None:
             self.strain = np.eye(self.n_dim, dtype=np.float64)
-        self.pos_ortho = self.pos.dot(np.linalg.inv(strain).T)  # cell_list does not change
+        else:
+            self.strain = np.asarray(strain, dtype=np.float64)
+        self._nc_p = 100
+        self.rc = rc
+        self.pos_ortho = self.pos.dot(np.linalg.inv(self.strain).T)  # cell_list does not change
         self.ibox = np.asarray(box / rc, dtype=np.int64)
         self.n_cell = np.multiply.reduce(self.ibox)
+        self.cell_dim = np.ones(self.n_dim, dtype=np.int64) * 3
         self.cell_id = None
         self.cell_list = None
         self.cell_count = None
@@ -43,6 +44,7 @@ class MDSystem(object):
             self.d_strain = cuda.to_device(self.strain)
             self.d_ibox = cuda.to_device(self.ibox)
             self.d_cell_id = cuda.device_array((self.n,), dtype=np.int64)
+            self.d_cell_dim = cuda.to_device(self.cell_dim)
             # self.d_cell_id = cupy.asarray(self.d_cell_id)
             # self.d_cell_id = cupy.zeros((self.n,), dtype=np.int64)
             self._device = cuda.get_current_device()
@@ -61,16 +63,11 @@ class MDSystem(object):
         self.cell_id = self.cell_id[self.cell_list]  # need to use the cpu to make the RadixSort
         self.d_cell_id = cuda.to_device(self.cell_id)
         self.d_cell_list = cuda.to_device(self.cell_list)
-        self.d_cell_count = cuda.device_array((self.n_cell,), dtype=np.int64)
-        bpg = ceil(self.n_cell / self.tpb)
-        cu_cell_count[bpg, self.tpb](self.d_cell_id, self.d_cell_count)
-        self.cell_list = self.d_cell_list.copy_to_host()
-        self.cell_count = self.d_cell_count.copy_to_host()
-        cuda.synchronize()
+        self.cell_count = np.r_[0, np.cumsum(np.bincount(self.cell_id, minlength=self.n_cell))]
+        self.d_cell_count = cuda.to_device(self.cell_count)
 
     def cu_neighbour_list(self):
         _nl = cu_nl_strain(self.n_dim)
-        dim = np.ones(self.n_dim, dtype=np.int64)
         d_nc = cuda.device_array((self.n,), dtype=np.int64)
         d_nl = cuda.device_array((self.n, self._nc_p), dtype=np.int64)
         d_nc_max = cuda.device_array((1,), dtype=np.int64)
@@ -78,7 +75,7 @@ class MDSystem(object):
             cu_set_to_int[self.bpg, self.tpb](d_nc, 0)
             _nl[self.bpg, self.tpb](
                 self.d_pos_ortho, self.d_box, self.d_ibox, self.d_strain,
-                self.rc, self.d_cell_list, self.d_cell_count, d_nl, d_nc, dim
+                self.rc, self.d_cell_list, self.d_cell_count, d_nl, d_nc, self.d_cell_dim
             )
             cu_max_int[self.bpg, self.tpb](d_nc, d_nc_max)
             nc_max = d_nc_max.copy_to_host()
