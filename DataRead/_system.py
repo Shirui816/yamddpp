@@ -43,6 +43,8 @@ class MDSystem(object):
             self.d_strain = cuda.to_device(self.strain)
             self.d_ibox = cuda.to_device(self.ibox)
             self.d_cell_id = cuda.device_array((self.n,), dtype=np.int64)
+            # self.d_cell_id = cupy.asarray(self.d_cell_id)
+            # self.d_cell_id = cupy.zeros((self.n,), dtype=np.int64)
             self._device = cuda.get_current_device()
             self.tpb = self._device.WARP_SIZE
             self.bpg = ceil(self.n / self.tpb)
@@ -52,6 +54,7 @@ class MDSystem(object):
 
     def cu_cell_list(self):
         cu_cell_ind[self.bpg, self.tpb](self.pos_ortho, self.d_box, self.d_ibox, self.d_cell_id)
+        # self.d_cell_list = cupy.argsort(self.d_cell_id)  # could be used by cuda.jit
         self.cell_id = self.d_cell_id.copy_to_host()
         cuda.synchronize()
         self.cell_list = np.argsort(self.cell_id)
