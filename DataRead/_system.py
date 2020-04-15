@@ -57,6 +57,7 @@ class MDSystem(object):
     def cu_cell_list(self):
         # currently fast enough, for simulations, all funcs must run on GPU
         # Numba cuda argsort/radixsort and bincount
+        # for 3D, 100000 particles, rho~1.5 system, this version is faster than using cupy...
         cu_cell_ind[self.bpg, self.tpb](self.pos_ortho, self.d_box, self.d_ibox, self.d_cell_id)
         # self.d_cell_list = cupy.argsort(self.d_cell_id)  # could be used by cuda.jit
         self.cell_id = self.d_cell_id.copy_to_host()
