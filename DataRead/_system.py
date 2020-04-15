@@ -82,11 +82,10 @@ class MDSystem(object):
             cu_max_int[self.bpg, self.tpb](d_nc, d_nc_max)
             nc_max = d_nc_max.copy_to_host()
             cuda.synchronize()
-            if nc_max[0] > self._nc_p:
-                self._nc_p = nc_max[0]
-                d_nl = cuda.device_array((self.n, self._nc_p), dtype=np.int64)
-            else:
+            if nc_max[0] <= self._nc_p:
                 break
+            self._nc_p = nc_max[0]
+            d_nl = cuda.device_array((self.n, self._nc_p), dtype=np.int64)
         self.d_nc = d_nc
         self.d_nl = d_nl
         self.nl = self.d_nl.copy_to_host()

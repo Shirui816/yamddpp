@@ -130,6 +130,8 @@ def cu_nl_strain(n_dim):
                 pid_k = _cl[k]
                 # dr = pbc_dist_cu(_a[pid_k], _a[i], _box)
                 # use ortho-pos here and apply strain on dr
+                if i == pid_k:
+                    continue
                 dr = cu_mat_dot_v_pbc_dist(_str, _a[pid_k], _a[i], _box)
                 if dr < _rc:
                     if _nc[i] < _ret.shape[1]:
