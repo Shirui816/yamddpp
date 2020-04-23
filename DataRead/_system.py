@@ -77,7 +77,7 @@ class MDSystem(object):
         while True:
             cu_set_to_int[self.bpg, self.tpb](d_nc, 0)
             _nl[self.bpg, self.tpb](
-                self.d_pos_ortho, self.d_box, self.d_ibox, self.d_strain,
+                self.d_pos, self.d_box, self.d_ibox, self.d_strain,
                 self.rc, self.d_cell_list, self.d_cell_count, d_nl, d_nc, self.d_cell_dim
             )
             cu_max_int[self.bpg, self.tpb](d_nc, d_nc_max)
