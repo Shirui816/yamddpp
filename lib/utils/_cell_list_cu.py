@@ -19,7 +19,7 @@ def cu_cell_id(p, box, ibox):
     # unravel in Fortran way.
 
 
-@cuda.jit("void(float64[:, :], float64[:], int64[:], int64[:]")
+@cuda.jit("void(float64[:, :], float64[:], int64[:], int64[:])")
 def cu_cell_ind(pos, box, ibox, ret):
     i = cuda.grid(1)
     if i < pos.shape[0]:
