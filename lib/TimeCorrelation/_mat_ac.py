@@ -4,7 +4,7 @@ import numpy as np
 def vec_ac(x, cum=None):
     r"""Vector autocorrelation function with samples.
     :param x: np.ndarray -> (n_frames, n_vectors, ..., ndim), ndim == 1 for 1-d vectors
-    :param cum: bool or seq of ints, take average of n_vectors or not.
+    :param cum: int or seq of ints, take average of n_vectors or not.
     :return: np.ndarray -> (n_frames,) of vector autocorrelation
             or (n_frames, n_vectors) if `cum=False'.
     """

@@ -6,7 +6,7 @@ from lib.TimeCorrelation import vec_ac
 def msd_square(x, cum=None):
     r"""
     :param x: np.ndarray, all vectors (n_frames, ..., n_dimension)
-    :param cum: bool, summing n_particles or not
+    :param cum: int or seq of ints, summing n_particles or not
     :return: np.ndarray, msd values
     """
     n = x.shape[0]
