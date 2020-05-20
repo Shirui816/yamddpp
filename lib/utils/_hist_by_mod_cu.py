@@ -34,7 +34,7 @@ def _unravel_indices_f(dim, gpu=0):
     return ret
 
 
-@cuda.jit  # x can be array of any dimension
+@cuda.jit("void(float64[:], float64[:,:], float64, float64, float64[:], int64[:])")
 def _cu_kernel(x, r, r_bin, r_max2, ret, cter):
     i = cuda.grid(1)
     if i >= x.shape[0]:
