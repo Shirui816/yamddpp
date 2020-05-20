@@ -3,26 +3,32 @@ import numpy as np
 from . import next_regular
 
 
-def vec_ac(x, cum=True):
+def vec_ac(x, cum=None):
     r"""Vector autocorrelation function with samples.
-    :param x: np.ndarray -> (n_frames, n_vectors, ...)
-    :param cum: bool, take average of n_vectors or not.
+    :param x: np.ndarray -> (n_frames, n_vectors, ..., ndim), ndim == 1 for 1-d vectors
+    :param cum: bool or seq of ints, take average of n_vectors or not.
     :return: np.ndarray -> (n_frames,) of vector autocorrelation
             or (n_frames, n_vectors) if `cum=False'.
     """
     fft = np.fft.rfft
     ifft = np.fft.irfft
-    if np.issubdtype(x.dtype, np.complex):
+    if np.issubdtype(x.dtype, np.dtype(np.complex)):
         fft = np.fft.fft
         ifft = np.fft.ifft
     n = x.shape[0]
     s = next_regular(2 * n)
-    summing_axes = tuple(range(1, x.ndim)) if cum else \
-        tuple(range(2, x.ndim))
-    norm = np.arange(n, 0, -1)
-    if not cum:
-        norm = np.expand_dims(norm, axis=-1)
+    if cum is not None:
+        summing_axes = tuple((*cum, -1)) if -1 not in cum else tuple(cum)
+    else:
+        summing_axes = (-1,)  # only add dimension
     # summing over samples and dimension or just dimension
+    norm = np.arange(n, 0, -1)
+    norm = np.expand_dims(norm, axis=tuple(range(1, x.ndim - len(summing_axes))))
+    # the dimension of correlation is at most (x.ndim - 1) for the last axis is
+    # summed due to vector dot. Or, if the cum axes are given, the dimension of
+    # output is (x.ndim - len(summing_axes)), an easier solution is setting
+    # `keepdims=True` for `np.sum`, then the dimension of array is preserved.
+    # am I so stupid that I've forgotten the reason why I wrote the mat_ac function???
     return ifft(np.sum(abs(fft(x, axis=0, n=s)) ** 2,
                        axis=summing_axes), axis=0, n=s)[:n].real / norm
 
@@ -36,7 +42,7 @@ def mat_ac(x, axes=None):
     """
     fft = np.fft.rfft
     ifft = np.fft.irfft
-    if np.issubdtype(x.dtype, np.complex):
+    if np.issubdtype(x.dtype, np.dtype(np.complex)):
         fft = np.fft.fft
         ifft = np.fft.ifft
     n = x.shape[0]

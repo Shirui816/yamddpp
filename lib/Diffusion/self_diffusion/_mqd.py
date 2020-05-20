@@ -1,7 +1,5 @@
 import numpy as np
 
-from lib.TimeCorrelation import next_regular
-
 
 def _vec_cc(a, b, n):
     r"""$FT{a \star b + b \star a}$
@@ -19,7 +17,7 @@ def mqd(x, cum=True):
     :return: np.ndarray, mqd
     """
     n, n_samples = x.shape[0], x.shape[1]
-    s = next_regular(n * 2)
+    s = n * 2
     x2 = np.square(x)
     x4 = np.square(x2).sum(axis=2)
     xt, yt, zt = x[..., 0], x[..., 1], x[..., 2]
