@@ -2,7 +2,7 @@ import numpy as np
 from numba import float64
 from numba import guvectorize
 
-from lib.Aggregation import pbc
+from ..Aggregation import pbc
 from ._bond_angle import bond_angles
 from ._bond_angle import bond_angles_ufunc
 from ._rg_tensor import batch_rg_tensor

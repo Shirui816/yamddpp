@@ -1,6 +1,10 @@
+import sys
+
 import numpy as np
 
-from lib.TimeCorrelation import vec_ac
+sys.path.append("../../")
+
+from TimeCorrelation import vec_ac
 
 
 def msd_square(x, cum=None):

@@ -4,11 +4,11 @@ import numba as nb
 import numpy as np
 from numba import cuda
 
-from lib.Aggregation import pbc_dist_cu
-from lib.utils import cu_cell_id
-from lib.utils import cu_cell_list_argsort
-from lib.utils import ravel_index_f_cu
-from lib.utils import unravel_index_f_cu
+from ..Aggregation import pbc_dist_cu
+from ..utils import cu_cell_id
+from ..utils import cu_cell_list_argsort
+from ..utils import ravel_index_f_cu
+from ..utils import unravel_index_f_cu
 
 
 @cuda.jit("void(int64[:], int64[:])", device=True)

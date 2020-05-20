@@ -1,7 +1,7 @@
 import numpy as np
 
-from lib.utils import hist_vec_by_r
-from lib.utils import hist_vec_by_r_cu
+from ..utils import hist_vec_by_r
+from ..utils import hist_vec_by_r_cu
 
 
 def rdf_xy(x, y, x_range, bins, r_bin=0.2, use_gpu=False):
