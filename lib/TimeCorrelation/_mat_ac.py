@@ -16,6 +16,8 @@ def vec_ac(x, cum=None):
     n = x.shape[0]
     s = 2 * n
     if cum is not None:
+        if isinstance(cum, int): cum = (cum,)
+        if 0 in cum: raise ValueError("Time axis cannot be added!")
         summing_axes = tuple((*cum, -1)) if -1 not in cum else tuple(cum)
     else:
         summing_axes = (-1,)  # only add dimension

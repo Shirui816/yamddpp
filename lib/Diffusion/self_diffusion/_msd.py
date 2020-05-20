@@ -9,8 +9,10 @@ def msd_square(x, cum=None):
     :param cum: bool, summing n_particles or not
     :return: np.ndarray, msd values
     """
-    n, n_samples = x.shape[0], x.shape[1]
+    n = x.shape[0]
     if cum is not None:
+        if isinstance(cum, int): cum = (cum,)
+        if 0 in cum: raise ValueError("Time axis cannot be added!")
         summing_axes = tuple((*cum, -1)) if -1 not in cum else tuple(cum)
     else:
         summing_axes = (-1,)  # only add dimension
