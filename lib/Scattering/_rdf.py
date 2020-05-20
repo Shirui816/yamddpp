@@ -17,6 +17,8 @@ def rdf_xy(x, y, x_range, bins, r_bin=0.2, use_gpu=False):
     if not (isinstance(use_gpu, bool) or isinstance(use_gpu, int)):
         raise ValueError("`use_gpu' should be bool or int!")
     mode = 'ab' if x is not y else 'aa'
+    bins = np.asarray(bins)
+    bins = np.where(bins % 2 == 0, bins + 1, bins)
     box = np.array(np.array([_[1] - _[0] for _ in x_range]))
     px, ex = np.histogramdd(x, bins=bins, range=x_range)
     _ft_px = np.fft.rfftn(px)
