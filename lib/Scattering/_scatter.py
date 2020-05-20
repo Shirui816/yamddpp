@@ -73,6 +73,7 @@ def scatter_xy(x, y=None, x_range=None, r_cut=0.5, q_bin=0.1, q_max=6.3, zero_pa
     dq = dq * 2 * np.pi
     middle = np.asarray(_sq_xy.shape, dtype=np.float64) // 2
     _sq_xy = np.fft.fftshift(_sq_xy)  # shift 0-freq to middle
+    # _sq_xy[0, 0, ..., 0] = np.fft.fftshift(_sq_xy)[middle]
     if use_gpu is False:
         return hist_vec_by_r(_sq_xy, dq, q_bin, q_max, middle=middle)
     return hist_vec_by_r_cu(_sq_xy, dq, q_bin, q_max, gpu=use_gpu, middle=middle)
