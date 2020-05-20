@@ -93,7 +93,7 @@ def hist_vec_by_r_cu(x, dr, r_bin, r_max, middle=None, gpu=0):
     with cuda.gpus[gpu]:
         device = cuda.get_current_device()
         tpb = device.WARP_SIZE
-        bpg = int(np.ceil(x.shape[0] / tpb))
+        bpg = int(x.shape[0] // tpb + 1)
         if np.issubdtype(x.dtype, np.dtype(np.complex)):
             x_real = np.ascontiguousarray(x.real)
             x_imag = np.ascontiguousarray(x.imag)
