@@ -90,8 +90,8 @@ def hist_vec_by_r_cu(x, r, r_bin, r_max, gpu=0):
         tpb = device.WARP_SIZE
         bpg = int(np.ceil(x.shape[0] / tpb))
         if np.issubdtype(x.dtype, np.complex):
-            x_real = np.ascontiguousarray(x.real)
-            x_imag = np.ascontiguousarray(x.imag)
+            x_real = np.ascontiguousarray(x.real.ravel())
+            x_imag = np.ascontiguousarray(x.imag.ravel())
             ret_imag = np.zeros(int(r_max / r_bin) + 1, dtype=np.float)
             _cu_kernel_complex[bpg, tpb](x_real, x_imag, r, r_bin, r_max2, ret, ret_imag, cter)
             ret = ret + ret_imag * 1j

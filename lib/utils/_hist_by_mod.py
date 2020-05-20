@@ -2,10 +2,9 @@ from numba import jit
 import numpy as np
 
 
-@jit
 def hist_vec_by_r(x, r, r_bin, r_max):
     r_max2 = r_max ** 2
-    ret = np.zeros(int(r_max / r_bin) + 1, dtype=np.float)
+    ret = np.zeros(int(r_max / r_bin) + 1)
     cter = np.zeros(ret.shape, dtype=np.float)
     for idx in np.ndindex(x.shape):
         rr = 0
