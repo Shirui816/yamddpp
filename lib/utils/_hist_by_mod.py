@@ -4,16 +4,19 @@ import numpy as np
 
 def hist_vec_by_r(x, r, r_bin, r_max):
     r_max2 = r_max ** 2
-    ret = np.zeros(int(r_max / r_bin) + 1)
+    ret = np.zeros(int(r_max / r_bin) + 1, dtype=x.dtype)
     cter = np.zeros(ret.shape, dtype=np.float)
-    for idx in np.ndindex(x.shape):
-        rr = 0
-        for j, jdx in enumerate(idx):
-            rr += r[j, jdx] ** 2
-        if rr < r_max2:
-            kdx = int(rr ** 0.5 / r_bin)
-            ret[kdx] += x[idx]
-            cter[kdx] += 1
+    @jit(nopython=True)
+    def _func(x, r, r_bin, r_max2, ret, cter):
+        for idx in np.ndindex(x.shape):
+            rr = 0
+            for j, jdx in enumerate(idx):
+                rr += r[j, jdx] ** 2
+            if rr < r_max2:
+                kdx = int(rr ** 0.5 / r_bin)
+                ret[kdx] += x[idx]
+                cter[kdx] += 1
+    _func(x, r, r_bin, r_max2, ret, cter)
     cter[cter == 0] = 1
     return ret / cter
 

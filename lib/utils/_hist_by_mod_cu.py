@@ -51,8 +51,9 @@ def _cu_kernel(x, r, r_bin, r_max2, ret, cter):
         cuda.atomic.add(cter, jdx, 1)
 
 
-#@cuda.jit("void(float64[:,:,:], float64[:,:,:], float64[:,:], float64, float64,"
+#@cuda.jit("void(float64[:], float64[:], float64[:,:], float64, float64,"
 #          "float64[:], float64[:], int64[:])")
+# raveled array, in fortran way !!!
 @cuda.jit
 def _cu_kernel_complex(x_real, x_imag, r, r_bin, r_max2, ret, ret_imag, cter):
     i = cuda.grid(1)
@@ -64,6 +65,7 @@ def _cu_kernel_complex(x_real, x_imag, r, r_bin, r_max2, ret, ret_imag, cter):
         idx = int(j % r.shape[1])
         j = (j - idx) / r.shape[1]
         tmp += r[k, idx] ** 2
+        # unraveled in Fortran way !!!
     if tmp < r_max2:
         jdx = int(tmp ** 0.5 / r_bin)
         cuda.atomic.add(ret, jdx, x_real[i])  # currently cuda.atomic.add does not support np.complex
@@ -89,9 +91,9 @@ def hist_vec_by_r_cu(x, r, r_bin, r_max, gpu=0):
         device = cuda.get_current_device()
         tpb = device.WARP_SIZE
         bpg = int(np.ceil(x.shape[0] / tpb))
-        if np.issubdtype(x.dtype, np.complex):
-            x_real = np.ascontiguousarray(x.real.ravel())
-            x_imag = np.ascontiguousarray(x.imag.ravel())
+        if np.issubdtype(x.dtype, np.dtype(np.complex)):
+            x_real = np.ascontiguousarray(x.real)
+            x_imag = np.ascontiguousarray(x.imag)
             ret_imag = np.zeros(int(r_max / r_bin) + 1, dtype=np.float)
             _cu_kernel_complex[bpg, tpb](x_real, x_imag, r, r_bin, r_max2, ret, ret_imag, cter)
             ret = ret + ret_imag * 1j
