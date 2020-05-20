@@ -1,7 +1,7 @@
 from math import floor, atan2, sqrt, ceil, pi
 
 import numba as nb
-import numba as np
+import numpy as np
 from numba import cuda
 
 from lib.utils import cu_nl
