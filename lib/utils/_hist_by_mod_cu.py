@@ -34,17 +34,17 @@ def _unravel_indices_f(dim, gpu=0):
     return ret
 
 
-@cuda.jit("void(float64[:], float64[:,:], float64, float64, float64[:], int64[:])")
-def _cu_kernel(x, r, r_bin, r_max2, ret, cter):
+@cuda.jit("void(float64[:], int64[:], float64, float64, float64, float64[:], int64[:])")
+def _cu_kernel(x, dim, dr, r_bin, r_max2, ret, cter):
     i = cuda.grid(1)
     if i >= x.shape[0]:
         return
     tmp = 0
     j = i
-    for k in range(r.shape[0]):  # r.shape == (n-dim, n-coordinates in each dim)
-        idx = int(j % r.shape[1])
-        j = (j - idx) / r.shape[1]
-        tmp += r[k, idx] ** 2
+    for k in range(dim.shape[0]):  # r.shape == (n-dim, n-coordinates in each dim)
+        idx = int(j % dim[k])
+        j = (j - idx) / dim[k]
+        tmp += (dr * idx) ** 2
     if tmp < r_max2:
         jdx = int(tmp ** 0.5 / r_bin)
         cuda.atomic.add(ret, jdx, x[i])
@@ -52,18 +52,18 @@ def _cu_kernel(x, r, r_bin, r_max2, ret, cter):
 
 
 # raveled array, in fortran way !!!
-@cuda.jit("void(float64[:], float64[:], float64[:,:], float64,"
-          "float64, float64[:], float64[:], int64[:])")
-def _cu_kernel_complex(x_real, x_imag, r, r_bin, r_max2, ret, ret_imag, cter):
+@cuda.jit("void(float64[:], float64[:], int64, float64,"
+          "float64, float64, float64[:], float64[:], int64[:])")
+def _cu_kernel_complex(x_real, x_imag, dim, dr, r_bin, r_max2, ret, ret_imag, cter):
     i = cuda.grid(1)
     if i >= x_real.shape[0]:
         return
     tmp = 0
     j = i
-    for k in range(r.shape[0]):  # r.shape == (n-dim, n-elements on each dim)
-        idx = int(j % r.shape[1])
-        j = (j - idx) / r.shape[1]
-        tmp += r[k, idx] ** 2
+    for k in range(dim.shape[0]):  # r.shape == (n-dim, n-elements on each dim)
+        idx = int(j % dim[k])
+        j = (j - idx) / dim[k]
+        tmp += (dr * idx) ** 2
         # unraveled in Fortran way !!!
     if tmp < r_max2:
         jdx = int(tmp ** 0.5 / r_bin)
@@ -72,17 +72,19 @@ def _cu_kernel_complex(x_real, x_imag, r, r_bin, r_max2, ret, ret_imag, cter):
         cuda.atomic.add(cter, jdx, 1)
 
 
-def hist_vec_by_r_cu(x, r, r_bin, r_max, gpu=0):
+def hist_vec_by_r_cu(x, dr, r_bin, r_max, gpu=0):
     r"""Summing vector based function to modulus based function.
     $f(r) := \int F(\bm{r})\delta(r-|\bm{r}|)\mathrm{d}\bm{r} / \int \delta(r-|\bm{r}|)\mathrm{d}\bm{r}$
     :param x: np.ndarray, input
-    :param r: np.ndarray[ndim=2], x[dim_1, dim_2, ..., dim_n] ~ (r[1, dim_1(i)], r[2, dim_2(j), ...)
+    :param r: np.ndarray[ndim=2], x[len_1, len_2, ..., len_n] ~ (r1: len_1, r2: len_2, ..., r_n: len_n)
+    x: (Nx, Ny, Nz) -> r: (3 (xyz), N), currently, only Nx == Ny == Nz is supported.
     :param r_bin: double, bin size of r
     :param r_max: double, max of r
     :param gpu: int gpu number
     :return: np.ndarray, averaged $F(x, y, ...) -> 1/(4\pi\r^2) f(\sqrt{x^2+y^2+...})$
     """
     r_max2 = r_max ** 2
+    dim = np.asarray(x.shape, dtype=np.int64)
     ret = np.zeros(int(r_max / r_bin) + 1, dtype=np.float)
     cter = np.zeros(ret.shape, dtype=np.int64)
     x = x.ravel(order='F')
@@ -94,9 +96,9 @@ def hist_vec_by_r_cu(x, r, r_bin, r_max, gpu=0):
             x_real = np.ascontiguousarray(x.real)
             x_imag = np.ascontiguousarray(x.imag)
             ret_imag = np.zeros(int(r_max / r_bin) + 1, dtype=np.float)
-            _cu_kernel_complex[bpg, tpb](x_real, x_imag, r, r_bin, r_max2, ret, ret_imag, cter)
+            _cu_kernel_complex[bpg, tpb](x_real, x_imag, dim, dr, r_bin, r_max2, ret, ret_imag, cter)
             ret = ret + ret_imag * 1j
         else:
-            _cu_kernel[bpg, tpb](x, r, r_bin, r_max2, ret, cter)
+            _cu_kernel[bpg, tpb](x, dim, dr, r_bin, r_max2, ret, cter)
     cter[cter == 0] = 1
     return ret / cter

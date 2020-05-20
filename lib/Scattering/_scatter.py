@@ -65,8 +65,12 @@ def scatter_xy(x, y=None, x_range=None, r_cut=0.5, q_bin=0.1, q_max=6.3, zero_pa
     )
     # np.fft.rfftfreq does not work here, it has be the complete fft result.
     _d = box / bins
-    q = np.vstack([np.fft.fftfreq(_sq_xy.shape[_], _d[_]) for _ in range(_d.shape[0])])
-    q = q * 2 * np.pi
+    # q = np.vstack([np.fft.fftfreq(_sq_xy.shape[_], _d[_]) for _ in range(_d.shape[0])])
+    q0 = np.fft.fftfreq(_sq_xy.shape[0], _d[0])
+    # _d is same in all directions, i.e., r_cut of sampling is same in all directions
+    # so that dq is same in all directions
+    dq = q0[1] - q0[0]
+    dq = dq * 2 * np.pi
     if use_gpu is False:
-        return hist_vec_by_r(_sq_xy, q, q_bin, q_max)
-    return hist_vec_by_r_cu(_sq_xy, q, q_bin, q_max, gpu=use_gpu)
+        return hist_vec_by_r(_sq_xy, dq, q_bin, q_max)
+    return hist_vec_by_r_cu(_sq_xy, dq, q_bin, q_max, gpu=use_gpu)
