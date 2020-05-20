@@ -2,7 +2,6 @@ from numba import cuda
 import numpy as np
 from math import floor
 from math import ceil
-from pyculib.sorting import RadixSort
 
 
 @cuda.jit("int64(float64[:], float64[:], int64[:])", device=True)
@@ -43,32 +42,6 @@ def cu_cell_count(cell_id, ret):
     if i >= cell_id.shape[0]:
         return
     cuda.atomic.add(ret, cell_id[i] + 1, 1)
-
-
-def cu_cell_list(pos, box, ibox, gpu=0):
-    n = pos.shape[0]
-    n_cell = np.multiply.reduce(ibox)
-    cell_id = np.zeros(n).astype(np.int64)
-    with cuda.gpus[gpu]:
-        device = cuda.get_current_device()
-        tpb = device.WARP_SIZE
-        bpg = ceil(n / tpb)
-        cu_cell_ind[bpg, tpb](pos, box, ibox, cell_id)
-        if np.multiply.reduce(ibox) >= 2e5:  # using cuda if n_cell larger than 2e5.
-            cell_list = np.arange(n).astype(np.int64)
-            sorter = RadixSort(n, np.int64)
-            sorter.sort(keys=cell_id, vals=cell_list)  # don't known why sorter with np.int64
-            # gives strange results...
-        else:
-            cell_list = np.argsort(cell_id)
-            cell_id = cell_id[cell_list]
-        # cell_id.max() == np.multiply.reduce(ibox)
-        cell_counts = np.zeros(n_cell, dtype=np.int64)
-        cu_cell_count[bpg, tpb](cell_id, cell_counts)
-    cell_counts = np.cumsum(cell_counts)
-    # cell_counts = np.r_[0, np.diff(np.flatnonzero(np.diff(cell_id)) + 1, prepend=0, append=cell_id.shape[0]).cumsum()]
-    # cell_counts = cell_count(cell_id)
-    return cell_list.astype(np.int64), cell_counts.astype(np.int64)
 
 
 def cu_cell_list_argsort(pos, box, ibox, gpu=0):
