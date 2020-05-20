@@ -52,7 +52,7 @@ def _cu_kernel(x, dim, dr, r_bin, r_max2, ret, cter):
 
 
 # raveled array, in fortran way !!!
-@cuda.jit("void(float64[:], float64[:], int64, float64,"
+@cuda.jit("void(float64[:], float64[:], int64[:], float64,"
           "float64, float64, float64[:], float64[:], int64[:])")
 def _cu_kernel_complex(x_real, x_imag, dim, dr, r_bin, r_max2, ret, ret_imag, cter):
     i = cuda.grid(1)
