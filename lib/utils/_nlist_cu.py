@@ -5,7 +5,7 @@ import numpy as np
 from numba import cuda
 
 from ._cell_list_cu import cu_cell_id
-from ._cell_list_cu import cu_cell_list
+from ._cell_list_cu import cu_cell_list_argsort
 from ._utils import add_local_arr_mois_1
 from ._utils import cu_max_int, cu_mat_dot_v_pbc_dist
 from ._utils import cu_set_to_int
@@ -18,7 +18,7 @@ def cu_nl(a, box, rc, nc_p=100, gpu=0):
     dim = np.ones(a.shape[1], dtype=np.int64) * 3
     ndim = a.shape[1]
     ibox = np.asarray(np.round(box / rc), dtype=np.int64)
-    cl, cc = cu_cell_list(a, box, ibox, gpu=gpu)
+    cl, cc = cu_cell_list_argsort(a, box, ibox, gpu=gpu)
 
     # neighbour is always smaller than max_cell * 3 ** ndim
     # ret = np.zeros((a.shape[0], cc.max() * 3 ** ndim), dtype=np.int64)
