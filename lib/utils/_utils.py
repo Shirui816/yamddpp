@@ -54,7 +54,7 @@ def cu_set_to_int(arr, val):
 
 @cuda.jit('void(int64[:], int64[:])')
 def cu_max_int(arr, ret):
-    i = cuda.gird(1)
+    i = cuda.grid(1)
     if i >= arr.shape[0]:
         return
     cuda.atomic.max(ret, 0, arr[i])
