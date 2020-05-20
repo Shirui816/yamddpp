@@ -5,8 +5,8 @@ from numba import cuda
 from numba import float64
 from numba import vectorize
 
-from lib.utils import get_from_cell
-from lib.utils import linked_cl
+from ..utils import get_from_cell
+from ..utils import linked_cl
 from ._cluster_dbscan import cluster as method_dbscan
 from ._com import com
 
