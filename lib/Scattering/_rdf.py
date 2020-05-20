@@ -28,13 +28,15 @@ def rdf_xy(x, y, x_range, bins, r_bin=0.2, use_gpu=False):
     _rdf_xyz = np.fft.irfftn(_ft_px_py, bins)
     # _ft_py_px[t] == _ft_px_py[-t]
     _rdf_xyz[0, 0, 0] -= 0 if mode == 'ab' else x.shape[0]
-    _rdf_xyz = np.fft.fftshift(_rdf_xyz)  # for x, y are in (-box/2, box/2)
+    _rdf_xyz = np.fft.fftshift(_rdf_xyz)  # for x, y are in (-box/2, box/2]
+    # if rdf is not shifted, it becomes [0, dr, 2dr, ..., n//2 dr, -n//2 dr, ..., -dr]
+    middle = np.asarray(_rdf_xyz.shape, dtype=np.float64) // 2
     dr = ex[0][1] - ex[0][0]
     if use_gpu is False:
-        _rdf = hist_vec_by_r(_rdf_xyz, dr, r_bin, box.min() / 2)
+        _rdf = hist_vec_by_r(_rdf_xyz, dr, r_bin, box.min() / 2, middle=middle)
     else:
         _rdf = hist_vec_by_r_cu(_rdf_xyz, dr, r_bin, box.min() / 2,
-                                gpu=use_gpu)
+                                gpu=use_gpu, middle=middle)
     _rdf /= x.shape[0] * y.shape[0]
     _rdf *= np.multiply.reduce(bins)
     return (np.arange(_rdf.shape[0]) + 0.5) * r_bin, _rdf
