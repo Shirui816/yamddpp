@@ -1,6 +1,6 @@
 import numpy as np
-from utils import hist_vec_by_r
-from utils import hist_vec_by_r_cu
+from lib.utils import hist_vec_by_r
+from lib.utils import hist_vec_by_r_cu
 
 
 def scatter_xy(x, y=None, x_range=None, r_cut=0.5, q_bin=0.1, q_max=6.3, zero_padding=1, expand=0, use_gpu=False):

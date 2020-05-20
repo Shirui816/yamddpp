@@ -1,5 +1,5 @@
 import numpy as np
-from TimeCorrelation import next_regular
+from lib.TimeCorrelation import next_regular
 
 
 def _vec_cc(a, b, n):

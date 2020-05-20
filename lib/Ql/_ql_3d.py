@@ -4,7 +4,7 @@ import numba as nb
 import numba as np
 from numba import cuda
 
-from utils import cu_nl
+from lib.utils import cu_nl
 from ._spherical_harmonics import sphHar
 
 

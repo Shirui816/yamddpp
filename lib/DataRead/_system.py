@@ -3,8 +3,8 @@ from math import ceil
 import numpy as np
 from numba import cuda
 
-from utils import cu_cell_ind, cu_nl_strain
-from utils import cu_max_int, cu_set_to_int
+from lib.utils import cu_cell_ind, cu_nl_strain
+from lib.utils import cu_max_int, cu_set_to_int
 
 
 class MDSystem(object):

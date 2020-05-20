@@ -4,7 +4,7 @@ import numba as nb
 import numpy as np
 from numba import cuda
 
-from utils import cu_mat_dot_v_pbc, cu_mat_dot_v
+from lib.utils import cu_mat_dot_v_pbc, cu_mat_dot_v
 
 
 def local_non_affine_of_ab(sys_a, sys_b):
