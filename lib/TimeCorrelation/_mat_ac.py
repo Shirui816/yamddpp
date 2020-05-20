@@ -1,6 +1,6 @@
 import numpy as np
 
-from . import next_regular
+from lib.TimeCorrelation import next_regular
 
 
 def vec_ac(x, cum=None):
