@@ -51,10 +51,9 @@ def _cu_kernel(x, r, r_bin, r_max2, ret, cter):
         cuda.atomic.add(cter, jdx, 1)
 
 
-#@cuda.jit("void(float64[:], float64[:], float64[:,:], float64, float64,"
-#          "float64[:], float64[:], int64[:])")
 # raveled array, in fortran way !!!
-@cuda.jit
+@cuda.jit("void(float64[:], float64[:], float64[:,:], float64,"
+          "float64, float64[:], float64[:], int64[:])")
 def _cu_kernel_complex(x_real, x_imag, r, r_bin, r_max2, ret, ret_imag, cter):
     i = cuda.grid(1)
     if i >= x_real.shape[0]:
@@ -85,7 +84,7 @@ def hist_vec_by_r_cu(x, r, r_bin, r_max, gpu=0):
     """
     r_max2 = r_max ** 2
     ret = np.zeros(int(r_max / r_bin) + 1, dtype=np.float)
-    cter = np.zeros(ret.shape, dtype=np.uint32)
+    cter = np.zeros(ret.shape, dtype=np.int64)
     x = x.ravel(order='F')
     with cuda.gpus[gpu]:
         device = cuda.get_current_device()
