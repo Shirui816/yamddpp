@@ -1,6 +1,4 @@
-from libc.math cimport sqrt, floor
 cimport cython
-cimport numpy as np
 import numpy as np
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function

@@ -2,8 +2,15 @@ import numpy as np
 cimport numpy as np
 import cython
 from cython.parallel import prange, parallel
-cimport openmp
 from libc.math cimport floor,sqrt,pow
+cimport
+numpy as np
+import cython
+import numpy as np
+from cython.parallel import prange, parallel
+from libc.math cimport
+
+floor, sqrt, pow
 
 
 @cython.cdivision(True)

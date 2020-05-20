@@ -1,6 +1,7 @@
-from numba import cuda
 from math import floor, sqrt
+
 import numba as np
+from numba import cuda
 
 
 @cuda.jit("float64(float64[:,:], float64[:], float64[:], float64[:])", device=True)

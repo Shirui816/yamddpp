@@ -1,6 +1,7 @@
-from . import bond_vecs
-from . import batch_inner_prod
 import numpy as np
+
+from . import batch_inner_prod
+from . import bond_vecs
 
 
 def bond_angles(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:

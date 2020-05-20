@@ -2,8 +2,8 @@ from math import floor, sqrt
 
 import numpy as np
 from numba import cuda
-from numba import vectorize
 from numba import float64
+from numba import vectorize
 
 from lib.utils import get_from_cell
 from lib.utils import linked_cl
@@ -17,6 +17,8 @@ from ._com import com
 @vectorize([(float64(float64, float64))], target='parallel')  # gpu, cpu
 def pbc_ufunc(r, d):
     return r - d * floor(r / d + 0.5)
+
+
 # faster than pbc defined below
 
 

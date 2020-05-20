@@ -1,7 +1,8 @@
-from numba import cuda
-import numpy as np
-from math import floor
 from math import ceil
+from math import floor
+
+import numpy as np
+from numba import cuda
 
 
 @cuda.jit("int64(float64[:], float64[:], int64[:])", device=True)
@@ -57,8 +58,6 @@ def cu_cell_list_argsort(pos, box, ibox, gpu=0):
     cell_id = cell_id[cell_list]
     cell_counts = np.r_[0, np.cumsum(np.bincount(cell_id, minlength=n_cell))]
     return cell_list.astype(np.int64), cell_counts.astype(np.int64)
-
-
 
 # calling: for a particle in nth cell, cell_count[n] gives the start index of
 # cell_list, and cell_count[n+1] gives the end index of cell_list.

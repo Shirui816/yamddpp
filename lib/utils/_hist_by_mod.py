@@ -1,11 +1,12 @@
-from numba import jit
 import numpy as np
+from numba import jit
 
 
 def hist_vec_by_r(x, r, r_bin, r_max):
     r_max2 = r_max ** 2
     ret = np.zeros(int(r_max / r_bin) + 1, dtype=x.dtype)
     cter = np.zeros(ret.shape, dtype=np.float)
+
     @jit(nopython=True)
     def _func(x, r, r_bin, r_max2, ret, cter):
         for idx in np.ndindex(x.shape):
@@ -16,12 +17,13 @@ def hist_vec_by_r(x, r, r_bin, r_max):
                 kdx = int(rr ** 0.5 / r_bin)
                 ret[kdx] += x[idx]
                 cter[kdx] += 1
+
     _func(x, r, r_bin, r_max2, ret, cter)
     cter[cter == 0] = 1
     return ret / cter
 
 # for datas of all dimensions. x.shape == (500, 500, 500), r.shape == (3, 500). ~ 2.05s
 # np.ndindex is in C order: ret
-#p,_ = np.histogram(np.linalg.norm(np.asarray(list(np.ndindex(a.shape))), axis=-1),bins=50,range=(0,5), weights=x.ravel('C'))
+# p,_ = np.histogram(np.linalg.norm(np.asarray(list(np.ndindex(a.shape))), axis=-1),bins=50,range=(0,5), weights=x.ravel('C'))
 # cter:
-#p,_ = np.histogram(np.linalg.norm(np.asarray(list(np.ndindex(a.shape))), axis=-1),bins=50,range=(0,5))
+# p,_ = np.histogram(np.linalg.norm(np.asarray(list(np.ndindex(a.shape))), axis=-1),bins=50,range=(0,5))

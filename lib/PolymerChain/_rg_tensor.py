@@ -1,4 +1,5 @@
 import numpy as np
+
 from . import batch_dot
 from . import bond_vecs
 

@@ -1,6 +1,7 @@
-from ._mat_ac import vec_ac
-from ._mat_ac import mat_ac
 import numpy as np
+
+from ._mat_ac import mat_ac
+from ._mat_ac import vec_ac
 
 
 def next_regular(target):

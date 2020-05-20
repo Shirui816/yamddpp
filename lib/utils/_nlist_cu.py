@@ -7,7 +7,7 @@ from numba import cuda
 from ._cell_list_cu import cu_cell_id
 from ._cell_list_cu import cu_cell_list_argsort
 from ._utils import add_local_arr_mois_1
-from ._utils import cu_max_int, cu_mat_dot_v_pbc_dist
+from ._utils import cu_max_int
 from ._utils import cu_set_to_int
 from ._utils import pbc_dist_cu
 from ._utils import ravel_index_f_cu
@@ -132,7 +132,7 @@ def cu_nl_strain(n_dim):
                 # use ortho-pos here and apply strain on dr
                 if i == pid_k:
                     continue
-                #dr = cu_mat_dot_v_pbc_dist(_str, _a[pid_k], _a[i], _box)
+                # dr = cu_mat_dot_v_pbc_dist(_str, _a[pid_k], _a[i], _box)
                 dr = pbc_dist_cu(_a[pid_k], _a[i], _box)
                 # use ortho-box _box, distance can be directly calculated.
                 if dr < _rc:

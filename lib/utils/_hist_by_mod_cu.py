@@ -1,6 +1,6 @@
-from numba import cuda
-import numpy as np
 import numba as nb
+import numpy as np
+from numba import cuda
 
 
 @cuda.jit("void(int64, int64[:], int64[:])", device=True)
