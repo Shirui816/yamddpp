@@ -2,23 +2,27 @@ import numpy as np
 from numba import jit
 
 
-def hist_vec_by_r(x, dr, r_bin, r_max):
+def hist_vec_by_r(x, dr, r_bin, r_max, middle=None):
+    # middle is the index of array x where the corresponding
+    # position is zero vector.
     r_max2 = r_max ** 2
     ret = np.zeros(int(r_max / r_bin) + 1, dtype=x.dtype)
     cter = np.zeros(ret.shape, dtype=np.float)
+    if middle is None:
+        middle = np.zeros(x.ndim, dtype=np.float)
 
     @jit(nopython=True)
-    def _func(x, r, r_bin, r_max2, ret, cter):
+    def _func(x, dr, r_bin, r_max2, ret, cter, middle):
         for idx in np.ndindex(x.shape):
             rr = 0
-            for j, jdx in enumerate(idx):
-                rr += (jdx * dr) ** 2
+            for jdx, m in zip(idx, middle):
+                rr += ((jdx - m) * dr) ** 2
             if rr < r_max2:
                 kdx = int(rr ** 0.5 / r_bin)
                 ret[kdx] += x[idx]
                 cter[kdx] += 1
 
-    _func(x, dr, r_bin, r_max2, ret, cter)
+    _func(x, dr, r_bin, r_max2, ret, cter, middle)
     cter[cter == 0] = 1
     return ret / cter
 

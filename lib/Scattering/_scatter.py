@@ -71,6 +71,7 @@ def scatter_xy(x, y=None, x_range=None, r_cut=0.5, q_bin=0.1, q_max=6.3, zero_pa
     # so that dq is same in all directions
     dq = q0[1] - q0[0]
     dq = dq * 2 * np.pi
+    middle = np.asarray(_sq_xy.shape, dtype=np.float64) // 2
     if use_gpu is False:
-        return hist_vec_by_r(_sq_xy, dq, q_bin, q_max)
-    return hist_vec_by_r_cu(_sq_xy, dq, q_bin, q_max, gpu=use_gpu)
+        return hist_vec_by_r(_sq_xy, dq, q_bin, q_max, middle=middle)
+    return hist_vec_by_r_cu(_sq_xy, dq, q_bin, q_max, gpu=use_gpu, middle=middle)
