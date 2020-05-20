@@ -1,7 +1,5 @@
 import numpy as np
 
-from lib.TimeCorrelation import next_regular
-
 
 def vec_ac(x, cum=None):
     r"""Vector autocorrelation function with samples.
@@ -16,7 +14,7 @@ def vec_ac(x, cum=None):
         fft = np.fft.fft
         ifft = np.fft.ifft
     n = x.shape[0]
-    s = next_regular(2 * n)
+    s = 2 * n
     if cum is not None:
         summing_axes = tuple((*cum, -1)) if -1 not in cum else tuple(cum)
     else:
@@ -46,7 +44,7 @@ def mat_ac(x, axes=None):
         fft = np.fft.fft
         ifft = np.fft.ifft
     n = x.shape[0]
-    s = next_regular(2 * n)  # 2 * n - 1 is fine.
+    s = 2 * n  # 2 * n - 1 is fine.
     norm = np.arange(n, 0, -1).reshape(n, *[1] * (x.ndim - 1))
     if axes is None:
         return ifft(abs(fft(x, axis=0, n=s)) ** 2,

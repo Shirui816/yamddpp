@@ -4,55 +4,6 @@ from ._mat_ac import mat_ac
 from ._mat_ac import vec_ac
 
 
-def next_regular(target):
-    r"""Copied from scipy.signal.fftconvolve
-    Find the next regular number greater than or equal to target.
-    Regular numbers are composites of the prime factors 2, 3, and 5.
-    Also known as 5-smooth numbers or Hamming numbers, these are the optimal
-    size for inputs to FFTPACK.
-    Target must be a positive integer.
-    """
-    if target <= 6:
-        return target
-
-    # Quickly check if it's already a power of 2
-    if not (target & (target - 1)):
-        return target
-
-    match = float('inf')  # Anything found will be smaller
-    p5 = 1
-    while p5 < target:
-        p35 = p5
-        while p35 < target:
-            # Ceiling integer division, avoiding conversion to float
-            # (quotient = ceil(target / p35))
-            quotient = -(-target // p35)
-
-            # Quickly find next power of 2 >= quotient
-            try:
-                p2 = 2 ** ((quotient - 1).bit_length())
-            except AttributeError:
-                # Fallback for Python <2.7
-                p2 = 2 ** (len(bin(quotient - 1)) - 2)
-
-            n = p2 * p35
-            if n == target:
-                return n
-            elif n < match:
-                match = n
-            p35 *= 3
-            if p35 == target:
-                return p35
-        if p35 < match:
-            match = p35
-        p5 *= 5
-        if p5 == target:
-            return p5
-    if p5 < match:
-        match = p5
-    return match
-
-
 def cross_correlate(in1, in2, axis=0):
     r"""Cross-correlation of matrices along given axis.
     Usually used in time-correlation, one axis is enough. Don't
@@ -84,7 +35,6 @@ def cross_correlate(in1, in2, axis=0):
     s1 = in1.shape[axis]
     s2 = in2.shape[axis]
     s = s1 + s2 - 1
-    f = next_regular(s)
-    return ifft(fft(in1, axis=axis, n=f) *
-                fft(np.flip(in2, axis=axis).conj(), axis=axis, n=f),
-                axis=axis, n=f)[:s]
+    return ifft(fft(in1, axis=axis, n=s) *
+                fft(np.flip(in2, axis=axis).conj(), axis=axis, n=s),
+                axis=axis, n=s)[:s]
