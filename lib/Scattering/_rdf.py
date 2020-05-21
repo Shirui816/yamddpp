@@ -31,6 +31,18 @@ def rdf_xy(x, y, x_range, bins, r_bin=0.2, use_gpu=False):
     # parameters are same, both cuda ver and cpu ver hist_vec_by_r function give
     # different value. This strange bug vanishes sometimes with even number of bins,
     # but never occurs in case of odd number of bins.
+    # results from hist_vec_to_r:
+    """
+    In[7]: hist_vec_by_r(a, 1 / 6, 0.1, 0.5, middle=np.array([3, 3, 3.]))
+    Out[7]: array([1., 6., 20., 30., 36., 1.])  # the counter, a.shape = (6,6,6)
+    In [8]: hist_vec_by_r(a, 0.1666666666666, 0.1, 0.5, middle=np.array([3,3,3.]))                                                                 
+    Out[8]: array([ 1.,  6., 20., 30., 63.,  1.])
+    but in this rdf case, variables are x_range=[(0.0,1.0)]*3 or [(-0.5, 0.5)]*3
+    and x = np.random.random((n, 3)) and x = x - 0.5, in these 2 cases, even the
+    _rdf_xyz before hist_vec_to_r are same. I have double checked r_cut, r_bin, dr, etc.
+    the ***PRINT*** results are also same. I don't know what triggers this. Now the solution
+    is simply use odd numbers as bin dimensions.
+    """
     box = np.array(np.array([_[1] - _[0] for _ in x_range]))
     px, ex = np.histogramdd(x, bins=bins, range=x_range)
     _ft_px = np.fft.rfftn(px)

@@ -13,6 +13,9 @@ def hist_vec_by_r(x, dr, r_bin, r_max, middle=None):
 
     @jit(nopython=True)
     def _func(x, dr, r_bin, r_max2, ret, cter, middle):
+        # wired bug: if x.shape = (6,6,6), dr=1/6, middle=(3,3,3), r_cut=0.5
+        # then index = (5,5,4) gives modulus r be exactly 0.5; if we let
+        # dr = 0.166666666666, the modulus would be 0.4999...
         for idx in np.ndindex(x.shape):
             rr = 0
             for jdx, m in zip(idx, middle):
