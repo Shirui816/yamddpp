@@ -19,6 +19,18 @@ def rdf_xy(x, y, x_range, bins, r_bin=0.2, use_gpu=False):
     mode = 'ab' if x is not y else 'aa'
     bins = np.asarray(bins)
     bins = np.where(bins % 2 == 0, bins + 1, bins)
+    # better use odd number here. different from sq, where dq has 2\pi
+    # in it, here we use, which might be 0.1, 0.01, etc. For instance,
+    # let r_bin=0.1, r_cut=0.5, and using x = np.random.random((n, 3))
+    # to generate samples, set box to be (0, 1] and bins = (6,6,6), may return
+    # different results if one sets box to be (-0.5, 0.5] and x = x - 0.5;
+    # some numerical errors cause a wired phenomenon: in case of FT{rho(x)}[5,5,4],
+    # with shift [3,3,3], the vector is [2,2,1] / 6 which has modulus of exact 0.5,
+    # and the index is int(0.5/0.1) = 5; however, if we shift box to (-0.5, 0.5),
+    # the modulus of this vector turns out to be 0.499999... and index is 4. All other
+    # parameters are same, both cuda ver and cpu ver hist_vec_by_r function give
+    # different value. This strange bug vanishes sometimes with even number of bins,
+    # but never occurs in case of odd number of bins.
     box = np.array(np.array([_[1] - _[0] for _ in x_range]))
     px, ex = np.histogramdd(x, bins=bins, range=x_range)
     _ft_px = np.fft.rfftn(px)
