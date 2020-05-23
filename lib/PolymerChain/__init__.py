@@ -16,6 +16,9 @@ def bond_vecs_common(samples, boxes):
         raise ValueError(
             "Are you using multiple box values for an 1-frame sample?"
         )
+    # only 2 dimensions are allowed:
+    # samples: (..., n_batch, n_frames, N_CHAINS, CHAIN_LENGTH, n_dim)
+    # boxes: (..., n_batch, n_frames, n_dim)
     boxes = np.expand_dims(np.expand_dims(boxes, -2), -3)
     return samples, boxes
 
