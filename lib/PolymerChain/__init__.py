@@ -2,11 +2,22 @@ import numpy as np
 from numba import float64
 from numba import guvectorize
 
-from ..Aggregation import pbc
 from ._bond_angle import bond_angles
 from ._bond_angle import bond_angles_ufunc
 from ._rg_tensor import batch_rg_tensor
 from ._rouse_modes import normal_modes
+from ..Aggregation import pbc
+
+
+def bond_vecs_common(samples, boxes):
+    if samples.ndim == 2:
+        samples = np.expand_dims(samples, 0)
+    if samples.ndim < boxes.ndim + 2:
+        raise ValueError(
+            "Are you using multiple box values for an 1-frame sample?"
+        )
+    boxes = np.expand_dims(np.expand_dims(boxes, -2), -3)
+    return samples, boxes
 
 
 def bond_vecs(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
@@ -18,13 +29,7 @@ def bond_vecs(samples: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     :return: np.ndarray ret. (..., n_chains, chain_length, n_dim) with
     (0, ...) for the 1st monomer on each chain.
     """
-    if samples.ndim == 2:
-        samples = np.expand_dims(samples, 0)
-    if samples.ndim < boxes.ndim + 2:
-        raise ValueError(
-            "Are you using multiple box values for an 1-frame sample?"
-        )
-    boxes = np.expand_dims(np.expand_dims(boxes, -2), -3)
+    samples, boxes = bond_vecs_common(samples, boxes)
     return pbc(
         np.diff(samples, axis=-2, prepend=samples[..., :1, :]), boxes
     )
