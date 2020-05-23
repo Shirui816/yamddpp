@@ -21,5 +21,4 @@ def batch_rg_tensor(x: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     cm = np.expand_dims(bv.mean(axis=-2), -2)
     bv = bv - cm
     cm = pbc(x[..., :1, :] + cm, boxes)
-    rg_tensors = batch_dot(np.swapaxes(bv, -2, -1), bv)
-    return rg_tensors / bv.shape[-2], cm, ree
+    return batch_dot(np.swapaxes(bv, -2, -1), bv) / bv.shape[-2], cm, ree
