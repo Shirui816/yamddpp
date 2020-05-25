@@ -5,8 +5,8 @@ from numba import jit
 def hist_vec_by_r(x, dr, r_bin, r_max, middle=None):
     # middle is the index of array x where the corresponding
     # position is zero vector.
-    index_max = int(r_max / r_bin)
-    ret = np.zeros(index_max + 1, dtype=x.dtype)
+    ret = np.zeros(int(r_max / r_bin) + 1, dtype=x.dtype)
+    r_max2 = float(ret.shape[0] * r_bin) ** 2
     cter = np.zeros(ret.shape, dtype=np.float)
     if middle is None:
         middle = np.zeros(x.ndim, dtype=np.float)
@@ -20,13 +20,13 @@ def hist_vec_by_r(x, dr, r_bin, r_max, middle=None):
             rr = 0
             for jdx, m in zip(idx, middle):
                 rr += ((jdx - m) * dr) ** 2
-            kdx = int(rr ** 0.5 / r_bin)  # using index rather than r^2
-            # r^2 is not that accurate for large modulus
-            if kdx < index_max:
+            if rr < r_max2:
+                # r^2 is not that accurate for large modulus if r_max == n_bins * r_cut
+                kdx = int(rr ** 0.5 / r_bin)
                 ret[kdx] += x[idx]
                 cter[kdx] += 1
 
-    _func(x, dr, r_bin, index_max, ret, cter, middle)
+    _func(x, dr, r_bin, r_max2, ret, cter, middle)
     cter[cter == 0] = 1
     return ret / cter
 

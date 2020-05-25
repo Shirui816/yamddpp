@@ -29,8 +29,8 @@ def rdf_of_ab_cu(a, b, box, da, db, bs, rc, gpu=0):
     :param gpu: gpu index, use 0 by default.
     :return: (r, rdf)
     """
-    index_max = int(rc / bs)
-    ret = np.zeros((a.shape[0], index_max), dtype=np.int64)
+    ret = np.zeros((a.shape[0], int(rc / bs) + 1), dtype=np.int64)
+    r_max = float(ret.shape[1] * bs)
     dim = np.ones(a.shape[1], dtype=np.int64) * 3
     ndim = a.shape[1]
     ibox = np.asarray(np.round(box / rc), dtype=np.int64)
@@ -47,9 +47,9 @@ def rdf_of_ab_cu(a, b, box, da, db, bs, rc, gpu=0):
 
     @cuda.jit(
         "void(float64[:,:],float64[:,:],float64[:],int64[:],float64[:],"
-        "float64[:],float64,int64,int64[:],int64[:],int64[:,:],int64[:])"
+        "float64[:],float64,float64,int64[:],int64[:],int64[:,:],int64[:])"
     )
-    def _rdf(_a, _b, _box, _ibox, _da, _db, _bs, _index_max, _cl, _cc, _ret, _dim):
+    def _rdf(_a, _b, _box, _ibox, _da, _db, _bs, _r_max, _cl, _cc, _ret, _dim):
         r"""
         :param _a: positions of a, (n_pa, n_d)
         :param _b: positions of b, (n_pb, n_d)
@@ -82,8 +82,8 @@ def rdf_of_ab_cu(a, b, box, da, db, bs, rc, gpu=0):
             for k in range(start, end):  # particle ids in cell_j
                 pid_k = _cl[k]
                 dij = pbc_dist_cu(_a[i], _b[pid_k], _box) - (_da[i] + _db[pid_k]) / 2 + 1
-                jdx = int(dij / _bs)
-                if jdx < _index_max:
+                if dij < _r_max:
+                    jdx = int(dij / _bs)
                     cuda.atomic.add(_ret[i], jdx, 1)
 
     with cuda.gpus[0]:
@@ -91,7 +91,7 @@ def rdf_of_ab_cu(a, b, box, da, db, bs, rc, gpu=0):
         tpb = device.WARP_SIZE
         bpg = ceil(a.shape[0] / tpb)
         _rdf[bpg, tpb](
-            a, b, box, ibox, da, db, bs, index_max, cl, cc, ret, dim
+            a, b, box, ibox, da, db, bs, r_max, cl, cc, ret, dim
         )
     rho_b = b.shape[0] / np.multiply.reduce(box)
     r = (np.arange(ret.shape[1] + 1) + 0.5) * bs
