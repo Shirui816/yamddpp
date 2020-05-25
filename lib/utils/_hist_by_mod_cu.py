@@ -1,3 +1,5 @@
+from math import floor, sqrt
+
 import numba as nb
 import numpy as np
 from numba import cuda
@@ -46,7 +48,7 @@ def _cu_kernel(x, dim, middle, dr, r_bin, r_max2, ret, cter):
         j = (j - idx) / dim[k]
         tmp += (dr * (idx - middle[k])) ** 2
     if tmp < r_max2:
-        jdx = int(tmp ** 0.5 / r_bin)
+        jdx = int(floor(sqrt(tmp) / r_bin))
         cuda.atomic.add(ret, jdx, x[i])
         cuda.atomic.add(cter, jdx, 1)
 
@@ -66,7 +68,8 @@ def _cu_kernel_complex(x_real, x_imag, dim, middle, dr, r_bin, r_max2, ret, ret_
         tmp += (dr * (idx - middle[k])) ** 2
         # unraveled in Fortran way !!!
     if tmp < r_max2:
-        jdx = int(tmp ** 0.5 / r_bin)
+        # jdx = int(tmp ** 0.5 / r_bin) # this method is not correct!
+        jdx = int(floor(sqrt(tmp) / r_bin))
         cuda.atomic.add(ret, jdx, x_real[i])  # currently cuda.atomic.add does not support np.complex
         cuda.atomic.add(ret_imag, jdx, x_imag[i])
         cuda.atomic.add(cter, jdx, 1)
