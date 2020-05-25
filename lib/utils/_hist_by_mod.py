@@ -5,14 +5,14 @@ from numba import jit
 def hist_vec_by_r(x, dr, r_bin, r_max, middle=None):
     # middle is the index of array x where the corresponding
     # position is zero vector.
-    r_max2 = r_max ** 2
-    ret = np.zeros(int(r_max / r_bin) + 1, dtype=x.dtype)
+    index_max = int(r_max / r_bin)
+    ret = np.zeros(index_max + 1, dtype=x.dtype)
     cter = np.zeros(ret.shape, dtype=np.float)
     if middle is None:
         middle = np.zeros(x.ndim, dtype=np.float)
 
     @jit(nopython=True)
-    def _func(x, dr, r_bin, r_max2, ret, cter, middle):
+    def _func(x, dr, r_bin, index_max, ret, cter, middle):
         # wired bug: if x.shape = (6,6,6), dr=1/6, middle=(3,3,3), r_cut=0.5
         # then index = (5,5,4) gives modulus r be exactly 0.5; if we let
         # dr = 0.166666666666, the modulus would be 0.4999...
@@ -20,12 +20,13 @@ def hist_vec_by_r(x, dr, r_bin, r_max, middle=None):
             rr = 0
             for jdx, m in zip(idx, middle):
                 rr += ((jdx - m) * dr) ** 2
-            if rr < r_max2:
-                kdx = int(rr ** 0.5 / r_bin)
+            kdx = int(rr ** 0.5 / r_bin)  # using index rather than r^2
+            # r^2 is not that accurate for large modulus
+            if kdx < index_max:
                 ret[kdx] += x[idx]
                 cter[kdx] += 1
 
-    _func(x, dr, r_bin, r_max2, ret, cter, middle)
+    _func(x, dr, r_bin, index_max, ret, cter, middle)
     cter[cter == 0] = 1
     return ret / cter
 
