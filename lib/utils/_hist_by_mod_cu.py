@@ -45,10 +45,10 @@ def _cu_kernel(x, dim, middle, dr, r_bin, r_max2, ret, cter):
         idx = int(j % dim[k])
         j = (j - idx) / dim[k]
         tmp += (dr * (idx - middle[k])) ** 2
-        if tmp < r_max2:
-            jdx = int(tmp ** 0.5 / r_bin)
-            cuda.atomic.add(ret, jdx, x[i])
-            cuda.atomic.add(cter, jdx, 1)
+    if tmp < r_max2:
+        jdx = int(tmp ** 0.5 / r_bin)
+        cuda.atomic.add(ret, jdx, x[i])
+        cuda.atomic.add(cter, jdx, 1)
 
 
 # raveled array, in fortran way !!!
@@ -65,11 +65,11 @@ def _cu_kernel_complex(x_real, x_imag, dim, middle, dr, r_bin, r_max2, ret, ret_
         j = (j - idx) / dim[k]
         tmp += (dr * (idx - middle[k])) ** 2
         # unraveled in Fortran way !!!
-        if tmp < r_max2:
-            jdx = int(tmp ** 0.5 / r_bin)
-            cuda.atomic.add(ret, jdx, x_real[i])  # currently cuda.atomic.add does not support np.complex
-            cuda.atomic.add(ret_imag, jdx, x_imag[i])
-            cuda.atomic.add(cter, jdx, 1)
+    if tmp < r_max2:
+        jdx = int(tmp ** 0.5 / r_bin)
+        cuda.atomic.add(ret, jdx, x_real[i])  # currently cuda.atomic.add does not support np.complex
+        cuda.atomic.add(ret_imag, jdx, x_imag[i])
+        cuda.atomic.add(cter, jdx, 1)
 
 
 def hist_vec_by_r_cu(x, dr, r_bin, r_max, middle=None, gpu=0):
