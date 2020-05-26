@@ -14,7 +14,7 @@ def ql(x, box, rc, ls=np.array([4, 6]), gpu=0):
     ret = np.zeros((x.shape[0], ls.shape[0]), dtype=np.float64)
 
     @cuda.jit("void(float64[:,:], float64[:], float64, int64[:,:], int64[:], int64[:], float64[:,:])")
-    def _ql(_x, _box, _rc, _nl, _nc, _ls, _ret):
+    def _ql(_x, _box, _rc2, _nl, _nc, _ls, _ret):
         i = cuda.grid(1)
         if i >= _x.shape[0]:
             return
@@ -35,7 +35,10 @@ def ql(x, box, rc, ls=np.array([4, 6]), gpu=0):
                 dx = dx - _box[0] * floor(dx / _box[0] + 0.5)
                 dy = dy - _box[1] * floor(dy / _box[1] + 0.5)
                 dz = dz - _box[2] * floor(dz / _box[2] + 0.5)
-                dr = sqrt(dx ** 2 + dy ** 2 + dz ** 2)
+                dr2 = dx ** 2 + dy ** 2 + dz ** 2
+                if dr2 >= _rc2:
+                    continue
+                dr = sqrt(dr2)
                 nn += 1.0
                 phi = atan2(dy, dx)
                 if phi < 0:
@@ -59,6 +62,6 @@ def ql(x, box, rc, ls=np.array([4, 6]), gpu=0):
         tpb = device.WARP_SIZE
         bpg = ceil(x.shape[0] / tpb)
         _ql[bpg, tpb](
-            x, box, rc, nl, nc, ls, ret
+            x, box, rc ** 2, nl, nc, ls, ret
         )
     return ret
