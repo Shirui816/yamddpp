@@ -1,6 +1,6 @@
 from math import floor, sqrt
 
-import numba as np
+import numpy as np
 from numba import cuda
 
 
