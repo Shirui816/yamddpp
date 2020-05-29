@@ -74,6 +74,7 @@ class ql:
     def _ql_local_func(self):
         _qvi = self._qvi
         _rei = self._rei
+
         @cuda.jit("void(float64[:,:], float64[:], float64, int64[:,:], int64[:], int64[:], float64[:,:])")
         def _ql_local(x, box, rc, nl, nc, ls, ret):
             i = cuda.grid(1)
@@ -150,3 +151,5 @@ class ql:
                     for m in range(-l, l + 1):
                         Qvec[i, _l, m + l] += sphHar(l, m, cosTheta, phi)  # thread-safe
             cuda.atomic.add(n_bonds, 0, nn)
+
+        return _ql_avg
