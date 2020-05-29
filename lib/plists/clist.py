@@ -4,7 +4,7 @@ from numba import int64, float32, float64, void
 from math import floor
 
 from ..utils import cu_set_to_int
-from . import cu_unravel_index_f, cu_ravel_index_f_pbc
+from ..utils import cu_unravel_index_f, cu_ravel_index_f_pbc
 
 
 def _gen_func(dtype, n_dim):
