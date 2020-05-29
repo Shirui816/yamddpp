@@ -9,7 +9,7 @@ from ..plists import nlist
 
 
 class ql:
-    def __init__(self, frame, ls=np.asarray([4, 6])):
+    def __init__(self, frame, ls=np.asarray([4, 6]), cell_guess=15, n_guess=10):
         self.frame = frame
         self.gpu = frame.gpu
         self.ls = ls
@@ -17,7 +17,7 @@ class ql:
         self._rei = ls.shape[0]
         self.cu_ql_local = self._ql_local_func()
         self.cu_ql_avg = self._ql_avg_func()
-        self.nlist = nlist(self.frame, contain_self=1)
+        self.nlist = nlist(self.frame, contain_self=1, cell_guess=cell_guess, n_guess=n_guess)
 
     def update(self, x=None, box=None, rc=None):
         if x is not None:
