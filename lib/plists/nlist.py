@@ -71,12 +71,13 @@ def _gen_func(dtype):
 class nlist(object):
     def __init__(self, frame, cell_guess=50, n_guess=150, contain_self=0):
         self.frame = frame
+        self.n = self.frame.n
         self.box = frame.box
         self.cell_guess = cell_guess
         self.n_guess = n_guess
         self.gpu = frame.gpu
         self.tpb = 64
-        self.bpg = int(frame.x.shape[0] // self.tpb + 1)
+        self.bpg = int(frame.n // self.tpb + 1)
         self.contain_self = contain_self
         # self.situ_zero = np.zeros(1, dtype=np.int64)
         self.update_counts = 0
@@ -93,6 +94,10 @@ class nlist(object):
 
     def neighbour_list(self):
         with cuda.gpus[self.gpu]:
+            if self.n != self.frame.n:
+                self.bpg = int(self.frame.n // self.tpb + 1)
+                self.d_nl = cuda.device_array((self.frame.n, self.n_guess), dtype=np.int64)
+                self.d_nc = cuda.device_array((self.frame.n,), dtype=np.int64)
             while True:
                 cu_set_to_int[self.bpg, self.tpb](self.d_nc, 0)
                 # reset situation while build nlist
@@ -117,6 +122,7 @@ class nlist(object):
                     self.d_nl = cuda.device_array((self.frame.n, self.n_guess), dtype=np.int64)
                 else:
                     break
+        self.n = self.frame.n
 
     def update(self):
         self.clist.update()

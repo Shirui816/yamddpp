@@ -64,6 +64,7 @@ class clist:
         self.box = frame.box
         self.cell_adj = np.ones(self.frame.n_dim, dtype=np.int64) * 3
         self.cell_guess = cell_guess
+        self.n = self.frame.n
         # self.situ_zero = np.zeros(1, dtype=np.int64)
         self.cu_cell_map, self.cu_cell_list = _gen_func(frame.x.dtype, self.frame.n_dim)
         self.ibox = np.asarray(np.floor(self.frame.box / self.frame.r_cut), dtype=np.int64)
@@ -99,6 +100,9 @@ class clist:
                 self.d_cell_list = cuda.device_array((self.n_cell, self.cell_guess),
                                                      dtype=np.int64)
                 self.d_cell_counts = cuda.device_array(self.n_cell, dtype=np.int64)
+            if self.n != self.frame.n:
+                self.d_cells = cuda.device_array(self.frame.n, dtype=np.int64)
+                self.bpg = int(self.frame.n // self.tpb + 1)
             while True:
                 cu_set_to_int[self.bpg_cell, self.tpb](self.d_cell_counts, 0)
                 self.cu_cell_list[self.bpg, self.tpb](self.frame.d_x,
@@ -118,3 +122,4 @@ class clist:
                 else:
                     break
         self.last_ibox = np.copy(ibox)
+        self.n = self.frame.n

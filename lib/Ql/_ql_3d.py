@@ -52,14 +52,14 @@ class ql:
                 cuda.synchronize()
             if mode == 'all' or mode == 'avg':
                 self.ql_avg = np.zeros(self.ls.shape[0])
-                Qvec = np.zeros((self.x.shape[0], self.ls.shape[0], int(2 * self.ls.max() + 1)), dtype=np.complex128)
+                Qvec = np.zeros((self.frame.n, self.ls.shape[0], int(2 * self.ls.max() + 1)), dtype=np.complex128)
                 d_Qvec = cuda.to_device(Qvec)
                 n_bonds = np.zeros(1, dtype=np.int64)
                 d_n_bonds = cuda.to_device(n_bonds)
                 self.cu_ql_avg[bpg, tpb](
                     self.frame.d_x,
                     self.frame.d_box,
-                    self.frame.rc,
+                    self.frame.r_cut,
                     self.nlist.d_nl,
                     self.nlist.d_nc,
                     self.ls,
