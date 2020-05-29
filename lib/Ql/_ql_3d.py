@@ -27,7 +27,7 @@ class ql:
             d_ls = cuda.to_device(self.ls)
             device = cuda.get_current_device()
             tpb = device.WARP_SIZE
-            bpg = np.ceil(self.x.shape[0] / tpb)
+            bpg = int(np.ceil(self.x.shape[0] / tpb))
             if mode == 'all' or mode == 'local':
                 self.ql_local = np.zeros((self.x.shape[0], self.ls.shape[0]), dtype=np.float64)
                 d_ql_local = cuda.to_device(self.ql_local)
