@@ -25,7 +25,7 @@ class ql:
         if box is not None:
             self.frame.box = box
         if rc is not None:
-            self.frame.rc = rc
+            self.frame.r_cut = rc
         self.frame.update()
         self.nlist.update()
         self.calculate('all')
@@ -42,7 +42,7 @@ class ql:
                 self.cu_ql_local[bpg, tpb](
                     self.frame.d_x,
                     self.frame.d_box,
-                    self.frame.rc,
+                    self.frame.r_cut,
                     self.nlist.d_nl,
                     self.nlist.d_nc,
                     d_ls,
