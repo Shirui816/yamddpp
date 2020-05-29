@@ -1,10 +1,9 @@
 from math import floor, atan2, sqrt, pi
 
-import numba as nb
 import numpy as np
-from numba import cuda
+from numba import cuda, void, float64, float32, complex128, complex64, int32
 
-from ._spherical_harmonics import sphHar
+from ._spherical_harmonics import gen_sph
 from ..plists import nlist
 
 
@@ -19,6 +18,19 @@ class ql:
         self.cu_ql_avg = self._ql_avg_func()
         self.nlist = nlist(self.frame, contain_self=1, cell_guess=cell_guess, n_guess=n_guess)
         self.r_cut = frame.r_cut
+        dtype = self.frame.x.dtype
+        self.q_local = None
+        self.ql_avg = None
+        global sphHar
+        sphHar = gen_sph(self.frame.x.dtype)
+        if dtype == np.dtype(np.float64):
+            self.float = float64
+            self.complex = complex128
+            self.np_complex = np.complex128
+        else:
+            self.float = float32
+            self.complex = complex64
+            self.np_complex = np.complex64
 
     def update(self, x=None, box=None, rc=None):
         if x is not None:
@@ -39,7 +51,7 @@ class ql:
             tpb = device.WARP_SIZE
             bpg = int(np.ceil(self.frame.x.shape[0] / tpb))
             if mode == 'all' or mode == 'local':
-                self.ql_local = np.zeros((self.frame.x.shape[0], self.ls.shape[0]), dtype=np.float64)
+                self.ql_local = np.zeros((self.frame.x.shape[0], self.ls.shape[0]), dtype=self.frame.x.dtype)
                 d_ql_local = cuda.to_device(self.ql_local)
                 self.cu_ql_local[bpg, tpb](
                     self.frame.d_x,
@@ -54,9 +66,9 @@ class ql:
                 cuda.synchronize()
             if mode == 'all' or mode == 'avg':
                 self.ql_avg = np.zeros(self.ls.shape[0])
-                Qvec = np.zeros((self.frame.n, self.ls.shape[0], int(2 * self.ls.max() + 1)), dtype=np.complex128)
-                d_Qvec = cuda.to_device(Qvec)
-                n_bonds = np.zeros(1, dtype=np.int64)
+                qvec = np.zeros((self.frame.n, self.ls.shape[0], int(2 * self.ls.max() + 1)), dtype=self.np_complex)
+                d_qvec = cuda.to_device(qvec)
+                n_bonds = np.zeros(1, dtype=np.int32)
                 d_n_bonds = cuda.to_device(n_bonds)
                 self.cu_ql_avg[bpg, tpb](
                     self.frame.d_x,
@@ -65,33 +77,35 @@ class ql:
                     self.nlist.d_nl,
                     self.nlist.d_nc,
                     self.ls,
-                    d_Qvec,
+                    d_qvec,
                     d_n_bonds
                 )
                 d_n_bonds.copy_to_host(n_bonds)
-                d_Qvec.copy_to_host(Qvec)
+                d_qvec.copy_to_host(qvec)
                 cuda.synchronize()
-                Qvec = np.sum(Qvec, axis=0)
+                qvec = np.sum(qvec, axis=0)
                 self.n_bonds = n_bonds[0]
                 if self.n_bonds < 1.0:
                     self.n_bonds = 1.0
-                for i in range(Qvec.shape[0]):
+                for i in range(qvec.shape[0]):
                     tmp = 0
-                    for j in range(Qvec.shape[1]):
-                        tmp += abs(Qvec[i, j] / self.n_bonds) ** 2
+                    for j in range(qvec.shape[1]):
+                        tmp += abs(qvec[i, j] / self.n_bonds) ** 2
                     self.ql_avg[i] = sqrt(tmp * 4 * np.pi / (2 * self.ls[i] + 1))
 
     def _ql_local_func(self):
         _qvi = self._qvi
         _rei = self._rei
+        complex = self.complex
+        float = self.float
 
-        @cuda.jit("void(float64[:,:], float64[:], float64, int64[:,:], int64[:], int64[:], float64[:,:])")
+        @cuda.jit(void(self.float[:, :], self.float[:], self.float, int32[:, :], int32[:], int32[:], self.float[:, :]))
         def _ql_local(x, box, rc, nl, nc, ls, ret):
             i = cuda.grid(1)
             if i >= x.shape[0]:
                 return
-            Qveci = cuda.local.array(_qvi, nb.complex128)
-            resi = cuda.local.array(_rei, nb.float64)
+            Qveci = cuda.local.array(_qvi, complex)
+            resi = cuda.local.array(_rei, float)
             for _ in range(Qveci.shape[0]):
                 resi[_] = 0
                 for __ in range(Qveci.shape[1]):
@@ -132,7 +146,8 @@ class ql:
 
     def _ql_avg_func(self):
         @cuda.jit(
-            "void(float64[:,:], float64[:], float64, int64[:,:], int64[:], int64[:], complex128[:,:,:], int64[:])")
+            void(self.float[:, :], self.float[:], self.float, int32[:, :], int32[:], int32[:], self.complex[:, :, :],
+                 int32[:]))
         def _ql_avg(x, box, rc, nl, nc, ls, Qvec, n_bonds):
             i = cuda.grid(1)
             if i >= x.shape[0]:

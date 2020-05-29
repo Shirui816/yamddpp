@@ -1,4 +1,4 @@
-from numba import cuda, int64, void
+from numba import cuda, int32, void
 
 from ._cell_list import cell_id
 from ._cell_list import get_from_cell
@@ -16,7 +16,7 @@ from ._utils import ravel_index_f_cu, unravel_index_f_cu, add_local_arr_mois_1
 from ._utils import rfft2fft
 
 
-@cuda.jit("void(int64[:], int64)")
+@cuda.jit("void(int32[:], int32)")
 def cu_set_to_int(arr, val):
     i = cuda.grid(1)
     if i >= arr.shape[0]:
@@ -24,7 +24,7 @@ def cu_set_to_int(arr, val):
     arr[i] = val
 
 
-@cuda.jit(int64(int64[:], int64[:]), device=True)
+@cuda.jit(int32(int32[:], int32[:]), device=True)
 def cu_ravel_index_f_pbc(i, dim):  # ravel index in Fortran way.
     ret = (i[0] + dim[0]) % dim[0]
     tmp = dim[0]
@@ -34,7 +34,7 @@ def cu_ravel_index_f_pbc(i, dim):  # ravel index in Fortran way.
     return ret
 
 
-@cuda.jit(void(int64, int64[:], int64[:]), device=True)
+@cuda.jit(void(int32, int32[:], int32[:]), device=True)
 def cu_unravel_index_f(i, dim, ret):  # unravel index in Fortran way.
     for k in range(dim.shape[0]):
         ret[k] = int(i % dim[k])
