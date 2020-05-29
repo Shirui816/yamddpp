@@ -104,12 +104,12 @@ class ql:
             i = cuda.grid(1)
             if i >= x.shape[0]:
                 return
-            Qveci = cuda.local.array(_qvi, nb_complex)
-            resi = cuda.local.array(_rei, nb_float)
-            for _ in range(Qveci.shape[0]):
-                resi[_] = 0
-                for __ in range(Qveci.shape[1]):
-                    Qveci[_, __] = 0 + 0j
+            qvec_i = cuda.local.array(_qvi, nb_complex)
+            res_i = cuda.local.array(_rei, nb_float)
+            for _ in range(qvec_i.shape[0]):
+                res_i[_] = 0
+                for __ in range(qvec_i.shape[1]):
+                    qvec_i[_, __] = 0 + 0j
             nn = 0.0
             for j in range(nc[i] - 1):
                 pj = nl[i, j]
@@ -132,15 +132,15 @@ class ql:
                     for _l in range(ls.shape[0]):
                         l = ls[_l]
                         for m in range(-l, l + 1):
-                            Qveci[_l, m + l] += sphHar(l, m, cosTheta, phi)
+                            qvec_i[_l, m + l] += sphHar(l, m, cosTheta, phi)
             # print(i, nn)
             if nn < 1.0:
                 nn = 1.0
-            for _ in range(Qveci.shape[0]):
-                for __ in range(Qveci.shape[1]):
-                    resi[_] += abs(Qveci[_, __] / nn) ** 2
-            for _ in range(Qveci.shape[0]):
-                ret[i, _] = sqrt(resi[_] * 4 * pi / (2 * ls[_] + 1))
+            for _ in range(qvec_i.shape[0]):
+                for __ in range(qvec_i.shape[1]):
+                    res_i[_] += abs(qvec_i[_, __] / nn) ** 2
+            for _ in range(qvec_i.shape[0]):
+                ret[i, _] = sqrt(res_i[_] * 4 * pi / (2 * ls[_] + 1))
 
         return _ql_local
 
