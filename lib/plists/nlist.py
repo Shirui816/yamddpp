@@ -1,8 +1,8 @@
 import numpy as np
 from numba import cuda, void, int64, float32, float64
 
-from ..utils import cu_set_to_int
 from .clist import clist
+from ..utils import cu_set_to_int
 
 
 @cuda.jit(void(int64[:], int64[:]))
@@ -69,32 +69,26 @@ def _gen_func(dtype):
 
 
 class nlist(object):
-    def __init__(self, x, box, r_cut, cell_guess=50, n_guess=150, gpu=0, contain_self=0):
-        self.x = x
-        self.n = x.shape[0]
-        self.n_dim = x.shape[1]
-        self.box = box
+    def __init__(self, frame, cell_guess=50, n_guess=150, contain_self=0):
+        self.frame = frame
+        self.box = frame.box
         self.cell_guess = cell_guess
         self.n_guess = n_guess
-        self.r_cut2 = r_cut ** 2
-        self.r_cut = r_cut
-        self.gpu = gpu
+        self.gpu = frame.gpu
         self.tpb = 64
-        self.bpg = int(x.shape[0] // self.tpb + 1)
+        self.bpg = int(frame.x.shape[0] // self.tpb + 1)
         self.contain_self = contain_self
         # self.situ_zero = np.zeros(1, dtype=np.int64)
         self.update_counts = 0
-        self.cu_nlist = _gen_func(x.dtype)
+        self.cu_nlist = _gen_func(frame.x.dtype)
         with cuda.gpus[self.gpu]:
             self.p_n_max = cuda.pinned_array((1,), dtype=np.int64)
             self.p_situation = cuda.pinned_array((1,), dtype=np.int64)
             self.d_n_max = cuda.device_array(1, dtype=np.int64)
-            self.d_nl = cuda.device_array((self.n, self.n_guess), dtype=np.int64)
-            self.d_nc = cuda.device_array((self.n,), dtype=np.int64)
+            self.d_nl = cuda.device_array((self.frame.n, self.n_guess), dtype=np.int64)
+            self.d_nc = cuda.device_array((self.frame.n,), dtype=np.int64)
             self.d_situation = cuda.device_array(1, dtype=np.int64)
-        self.clist = clist(self.x, self.box, self.r_cut, cell_guess=self.cell_guess)
-        self.d_x = self.clist.d_x
-        self.d_box = self.clist.d_box
+        self.clist = clist(self.frame, cell_guess=self.cell_guess)
         self.neighbour_list()
 
     def neighbour_list(self):
@@ -102,9 +96,9 @@ class nlist(object):
             while True:
                 cu_set_to_int[self.bpg, self.tpb](self.d_nc, 0)
                 # reset situation while build nlist
-                self.cu_nlist[self.bpg, self.tpb](self.d_x,
-                                                  self.d_box,
-                                                  self.r_cut2,
+                self.cu_nlist[self.bpg, self.tpb](self.frame.d_x,
+                                                  self.frame.d_box,
+                                                  self.frame.r_cut2,
                                                   self.clist.d_cell_map,
                                                   self.clist.d_cell_list,
                                                   self.clist.d_cell_counts,
@@ -120,7 +114,7 @@ class nlist(object):
                 if self.d_n_max[0] > self.n_guess:
                     self.n_guess = self.d_n_max[0]
                     self.n_guess = self.n_guess + 8 - (self.n_guess & 7)
-                    self.d_nl = cuda.device_array((self.n, self.n_guess), dtype=np.int64)
+                    self.d_nl = cuda.device_array((self.frame.n, self.n_guess), dtype=np.int64)
                 else:
                     break
 

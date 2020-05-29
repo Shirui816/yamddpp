@@ -39,3 +39,22 @@ def cu_unravel_index_f(i, dim, ret):  # unravel index in Fortran way.
     for k in range(dim.shape[0]):
         ret[k] = int(i % dim[k])
         i = (i - ret[k]) / dim[k]
+
+
+class frame:
+    def __init__(self, x, box, r_cut, gpu=0):
+        cuda.select_device(gpu)
+        self.gpu = gpu
+        self.x = x
+        self.box = box
+        self.r_cut = r_cut
+        self.r_cut2 = self.r_cut ** 2
+        self.update()
+
+    def update(self):
+        self.n_dim = self.x.shape[1]
+        self.n = self.x.shape[0]
+        self.r_cut2 = self.r_cut ** 2
+        with cuda.gpus[self.gpu]:
+            self.d_x = cuda.to_device(self.x)
+            self.d_box = cuda.to_device(self.box)

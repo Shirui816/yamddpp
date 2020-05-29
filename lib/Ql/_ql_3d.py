@@ -9,32 +9,40 @@ from ..plists import nlist
 
 
 class ql:
-    def __init__(self, x, box, rc, ls=np.asarray([4, 6]), gpu=0):
-        cuda.select_device(gpu)
-        self.x = x
-        self.box = box
-        self.rc = rc
-        self.gpu = gpu
+    def __init__(self, frame, ls=np.asarray([4, 6])):
+        self.frame = frame
+        self.gpu = frame.gpu
         self.ls = ls
         self._qvi = (ls.shape[0], int(2 * ls.max() + 1))
         self._rei = ls.shape[0]
         self.cu_ql_local = self._ql_local_func()
         self.cu_ql_avg = self._ql_avg_func()
-        self.nlist = nlist(x, box, rc, gpu=gpu, contain_self=1)
+        self.nlist = nlist(self.frame, contain_self=1)
+
+    def update(self, x=None, box=None, rc=None):
+        if x is not None:
+            self.frame.x = x
+        if box is not None:
+            self.frame.box = box
+        if rc is not None:
+            self.frame.rc = rc
+        self.frame.update()
+        self.nlist.update()
+        self.calculate('all')
 
     def calculate(self, mode='all'):
         with cuda.gpus[self.gpu]:
             d_ls = cuda.to_device(self.ls)
             device = cuda.get_current_device()
             tpb = device.WARP_SIZE
-            bpg = int(np.ceil(self.x.shape[0] / tpb))
+            bpg = int(np.ceil(self.frame.x.shape[0] / tpb))
             if mode == 'all' or mode == 'local':
-                self.ql_local = np.zeros((self.x.shape[0], self.ls.shape[0]), dtype=np.float64)
+                self.ql_local = np.zeros((self.frame.x.shape[0], self.ls.shape[0]), dtype=np.float64)
                 d_ql_local = cuda.to_device(self.ql_local)
                 self.cu_ql_local[bpg, tpb](
-                    self.nlist.d_x,
-                    self.nlist.d_box,
-                    self.rc,
+                    self.frame.d_x,
+                    self.frame.d_box,
+                    self.frame.rc,
                     self.nlist.d_nl,
                     self.nlist.d_nc,
                     d_ls,
@@ -49,9 +57,9 @@ class ql:
                 n_bonds = np.zeros(1, dtype=np.int64)
                 d_n_bonds = cuda.to_device(n_bonds)
                 self.cu_ql_avg[bpg, tpb](
-                    self.nlist.d_x,
-                    self.nlist.d_box,
-                    self.rc,
+                    self.frame.d_x,
+                    self.frame.d_box,
+                    self.frame.rc,
                     self.nlist.d_nl,
                     self.nlist.d_nc,
                     self.ls,

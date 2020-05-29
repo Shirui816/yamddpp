@@ -1,7 +1,8 @@
+from math import floor
+
 import numpy as np
 from numba import cuda
 from numba import int64, float32, float64, void
-from math import floor
 
 from ..utils import cu_set_to_int
 from ..utils import cu_unravel_index_f, cu_ravel_index_f_pbc
@@ -55,30 +56,27 @@ def _gen_func(dtype, n_dim):
 
     return cu_cell_map, cu_cell_list
 
+
 class clist:
-    def __init__(self, x, box, r_cut, gpu=0, cell_guess=50):
-        self.x = x
-        self.n = x.shape[0]
-        self.n_dim = x.shape[1]
-        self.box = box
-        self.rc = r_cut
-        self.gpu = gpu
-        self.ibox = np.asarray(np.floor(box / r_cut), dtype=np.int64)
-        self.n_cell = int(np.multiply.reduce(self.ibox))
-        self.cell_adj = np.ones(self.n_dim, dtype=np.int64) * 3
-        self.tpb = 64
-        self.bpg = int(self.n // self.tpb + 1)
-        self.bpg_cell = int(self.n_cell // self.tpb + 1)
+    def __init__(self, frame, cell_guess=50):
+        self.frame = frame
+        self.gpu = frame.gpu
+        self.box = frame.box
+        self.cell_adj = np.ones(self.frame.n_dim, dtype=np.int64) * 3
         self.cell_guess = cell_guess
         # self.situ_zero = np.zeros(1, dtype=np.int64)
-        self.cu_cell_map, self.cu_cell_list = _gen_func(x.dtype, self.n_dim)
+        self.cu_cell_map, self.cu_cell_list = _gen_func(frame.x.dtype, self.frame.n_dim)
+        self.ibox = np.asarray(np.floor(self.frame.box / self.frame.r_cut), dtype=np.int64)
+        self.last_ibox = np.copy(self.ibox)
+        self.n_cell = int(np.multiply.reduce(self.ibox))
+        self.tpb = 64
+        self.bpg = int(self.frame.n // self.tpb + 1)
+        self.bpg_cell = int(self.n_cell // self.tpb + 1)
         self.p_cell_max = cuda.pinned_array((1,), dtype=np.int64)
         with cuda.gpus[self.gpu]:
-            self.d_x = cuda.to_device(self.x)
-            self.d_box = cuda.to_device(self.box)
-            self.d_cells = cuda.device_array(self.n, dtype=np.int64)
-            self.d_cell_map = cuda.device_array((self.n_cell, 3 ** self.n_dim), dtype=np.int64)
+            self.d_cell_map = cuda.device_array((self.n_cell, 3 ** self.frame.n_dim), dtype=np.int64)
             self.d_ibox = cuda.to_device(self.ibox)
+            self.d_cells = cuda.device_array(self.frame.n, dtype=np.int64)
             self.d_cell_adj = cuda.to_device(self.cell_adj)
             self.cu_cell_map[self.bpg_cell, self.tpb](self.d_ibox, self.d_cell_adj, self.d_cell_map)
             self.d_cell_list = cuda.device_array((self.n_cell, self.cell_guess),
@@ -88,11 +86,23 @@ class clist:
         self.update()
 
     def update(self):
+        ibox = np.asarray(np.floor(self.frame.box / self.frame.r_cut), dtype=np.int64)
+        self.box_changed = not np.allclose(ibox, self.last_ibox)
         with cuda.gpus[self.gpu]:
+            if self.box_changed:
+                self.ibox = ibox
+                self.n_cell = int(np.multiply.reduce(self.ibox))
+                self.bpg_cell = int(self.n_cell // self.tpb + 1)
+                self.d_cell_map = cuda.device_array((self.n_cell, 3 ** self.frame.n_dim), dtype=np.int64)
+                self.d_ibox = cuda.to_device(self.ibox)
+                self.cu_cell_map[self.bpg_cell, self.tpb](self.d_ibox, self.d_cell_adj, self.d_cell_map)
+                self.d_cell_list = cuda.device_array((self.n_cell, self.cell_guess),
+                                                     dtype=np.int64)
+                self.d_cell_counts = cuda.device_array(self.n_cell, dtype=np.int64)
             while True:
                 cu_set_to_int[self.bpg_cell, self.tpb](self.d_cell_counts, 0)
-                self.cu_cell_list[self.bpg, self.tpb](self.d_x,
-                                                      self.d_box,
+                self.cu_cell_list[self.bpg, self.tpb](self.frame.d_x,
+                                                      self.frame.d_box,
                                                       self.d_ibox,
                                                       self.d_cell_list,
                                                       self.d_cell_counts,
@@ -107,3 +117,4 @@ class clist:
                                                          dtype=np.int64)
                 else:
                     break
+        self.last_ibox = np.copy(ibox)
