@@ -1,3 +1,5 @@
+from numba import cuda
+
 from ._cell_list import cell_id
 from ._cell_list import get_from_cell
 from ._cell_list import linked_cl
@@ -12,3 +14,11 @@ from ._utils import cu_max_int, cu_set_to_int, cu_mat_dot_v_pbc_dist, cu_mat_dot
 from ._utils import pbc_dist_cu
 from ._utils import ravel_index_f_cu, unravel_index_f_cu, add_local_arr_mois_1
 from ._utils import rfft2fft
+
+
+@cuda.jit("void(int64[:], int64)")
+def cu_set_to_int(arr, val):
+    i = cuda.grid(1)
+    if i >= arr.shape[0]:
+        return
+    arr[i] = val

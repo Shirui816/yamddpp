@@ -1,7 +1,7 @@
 import numpy as np
 from numba import cuda, void, int64, float32, float64
 
-from . import cu_set_to_int
+from ..utils import cu_set_to_int
 from .clist import clist
 
 
