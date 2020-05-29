@@ -18,6 +18,7 @@ class ql:
         self.cu_ql_local = self._ql_local_func()
         self.cu_ql_avg = self._ql_avg_func()
         self.nlist = nlist(self.frame, contain_self=1, cell_guess=cell_guess, n_guess=n_guess)
+        self.r_cut = frame.r_cut
 
     def update(self, x=None, box=None, rc=None):
         if x is not None:
@@ -26,6 +27,7 @@ class ql:
             self.frame.box = box
         if rc is not None:
             self.frame.r_cut = rc
+            self.r_cut = rc
         self.frame.update()
         self.nlist.update()
         self.calculate('all')
