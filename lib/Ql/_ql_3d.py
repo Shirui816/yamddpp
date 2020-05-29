@@ -102,8 +102,8 @@ class ql:
             i = cuda.grid(1)
             if i >= x.shape[0]:
                 return
-            Qveci = cuda.local.array(_qvi, complex)
-            resi = cuda.local.array(_rei, float)
+            Qveci = cuda.local.array(_qvi, self.complex)
+            resi = cuda.local.array(_rei, self.float)
             for _ in range(Qveci.shape[0]):
                 resi[_] = 0
                 for __ in range(Qveci.shape[1]):
