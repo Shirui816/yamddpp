@@ -72,13 +72,15 @@ class ql:
                     self.ql_avg[i] = sqrt(tmp * 4 * np.pi / (2 * self.ls[i] + 1))
 
     def _ql_local_func(self):
+        _qvi = self._qvi
+        _rei = self._rei
         @cuda.jit("void(float64[:,:], float64[:], float64, int64[:,:], int64[:], int64[:], float64[:,:])")
         def _ql_local(x, box, rc, nl, nc, ls, ret):
             i = cuda.grid(1)
             if i >= x.shape[0]:
                 return
-            Qveci = cuda.local.array(self._qvi, nb.complex128)
-            resi = cuda.local.array(self._rei, nb.float64)
+            Qveci = cuda.local.array(_qvi, nb.complex128)
+            resi = cuda.local.array(_rei, nb.float64)
             for _ in range(self._qvi[0]):
                 resi[_] = 0
                 for __ in range(self._qvi[1]):
