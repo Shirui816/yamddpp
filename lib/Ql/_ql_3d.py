@@ -14,8 +14,6 @@ class ql:
         self.ls = ls
         self._qvi = (ls.shape[0], int(2 * ls.max() + 1))
         self._rei = ls.shape[0]
-        self.cu_ql_local = self._ql_local_func()
-        self.cu_ql_avg = self._ql_avg_func()
         self.nlist = nlist(self.frame, contain_self=1, cell_guess=cell_guess, n_guess=n_guess)
         self.r_cut = frame.r_cut
         self.dtype = self.frame.x.dtype
@@ -23,6 +21,16 @@ class ql:
         self.ql_avg = None
         global sphHar
         sphHar = gen_sph(self.frame.x.dtype)
+        if self.dtype == np.dtype(np.float64):
+            self.float = float64
+            self.complex = complex128
+            self.np_complex = np.complex128
+        else:
+            self.float = float32
+            self.complex = complex64
+            self.np_complex = np.complex64
+        self.cu_ql_local = self._ql_local_func()
+        self.cu_ql_avg = self._ql_avg_func()
 
     def update(self, x=None, box=None, rc=None):
         if x is not None:
@@ -88,14 +96,6 @@ class ql:
     def _ql_local_func(self):
         _qvi = self._qvi
         _rei = self._rei
-        if self.dtype == np.dtype(np.float64):
-            self.float = float64
-            self.complex = complex128
-            self.np_complex = np.complex128
-        else:
-            self.float = float32
-            self.complex = complex64
-            self.np_complex = np.complex64
 
         @cuda.jit(void(self.float[:, :], self.float[:], self.float, int32[:, :], int32[:], int32[:], self.float[:, :]))
         def _ql_local(x, box, rc, nl, nc, ls, ret):
@@ -143,14 +143,6 @@ class ql:
         return _ql_local
 
     def _ql_avg_func(self):
-        if self.dtype == np.dtype(np.float64):
-            self.float = float64
-            self.complex = complex128
-            self.np_complex = np.complex128
-        else:
-            self.float = float32
-            self.complex = complex64
-            self.np_complex = np.complex64
 
         @cuda.jit(
             void(self.float[:, :], self.float[:], self.float, int32[:, :], int32[:], int32[:], self.complex[:, :, :],
