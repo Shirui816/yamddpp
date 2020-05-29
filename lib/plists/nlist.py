@@ -30,9 +30,8 @@ def _gen_func(dtype):
 
     @cuda.jit(
         void(float[:, :], float[:], float, int64[:, :], int64[:, :], int64[:], int64[:],
-             int64[:, :], int64[:], int64[:], int64[:], int64))
-    def cu_nlist(x, box, r_cut2, cell_map, cell_list, cell_count, cells, nl, nc, n_max,
-                 situation, contain_self):
+             int64[:, :], int64[:], int64[:], int64))
+    def cu_nlist(x, box, r_cut2, cell_map, cell_list, cell_count, cells, nl, nc, n_max, contain_self):
         pi = cuda.grid(1)
         if pi >= x.shape[0]:
             return
@@ -62,8 +61,6 @@ def _gen_func(dtype):
         nc[pi] = nn
         if nn > 0:
             cuda.atomic.max(n_max, 0, n_needed)
-        if pi == 0:  # reset situation only once while function is called
-            situation[0] = 0
 
     return cu_nlist
 
@@ -83,8 +80,7 @@ class nlist(object):
         self.update_counts = 0
         self.cu_nlist = _gen_func(frame.x.dtype)
         with cuda.gpus[self.gpu]:
-            self.p_n_max = cuda.pinned_array((1,), dtype=np.int64)
-            self.p_situation = cuda.pinned_array((1,), dtype=np.int64)
+            #self.p_n_max = cuda.pinned_array((1,), dtype=np.int64)
             self.d_n_max = cuda.device_array(1, dtype=np.int64)
             self.d_nl = cuda.device_array((self.frame.n, self.n_guess), dtype=np.int64)
             self.d_nc = cuda.device_array((self.frame.n,), dtype=np.int64)
@@ -111,13 +107,12 @@ class nlist(object):
                                                   self.d_nl,
                                                   self.d_nc,
                                                   self.d_n_max,
-                                                  self.d_situation,
                                                   self.contain_self)
-                self.d_n_max.copy_to_host(self.p_n_max)
+                p_n_max = self.d_n_max.copy_to_host()
                 cuda.synchronize()
                 # n_max = np.array([120])
-                if self.p_n_max[0] > self.n_guess:
-                    self.n_guess = self.p_n_max[0]
+                if p_n_max[0] > self.n_guess:
+                    self.n_guess = p_n_max[0]
                     self.n_guess = self.n_guess + 8 - (self.n_guess & 7)
                     self.d_nl = cuda.device_array((self.frame.n, self.n_guess), dtype=np.int64)
                 else:

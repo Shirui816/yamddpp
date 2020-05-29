@@ -73,7 +73,7 @@ class clist:
         self.tpb = 64
         self.bpg = int(self.frame.n // self.tpb + 1)
         self.bpg_cell = int(self.n_cell // self.tpb + 1)
-        self.p_cell_max = cuda.pinned_array((1,), dtype=np.int64)
+        #self.p_cell_max = cuda.pinned_array((1,), dtype=np.int64)
         with cuda.gpus[self.gpu]:
             self.d_cell_map = cuda.device_array((self.n_cell, 3 ** self.frame.n_dim), dtype=np.int64)
             self.d_ibox = cuda.to_device(self.ibox)
@@ -112,10 +112,10 @@ class clist:
                                                       self.d_cell_counts,
                                                       self.d_cells,
                                                       self.d_cell_max)
-                self.d_cell_max.copy_to_host(self.p_cell_max)
+                p_cell_max = self.d_cell_max.copy_to_host()
                 cuda.synchronize()
-                if self.p_cell_max[0] > self.cell_guess:
-                    self.cell_guess = self.p_cell_max[0]
+                if p_cell_max[0] > self.cell_guess:
+                    self.cell_guess = p_cell_max[0]
                     self.cell_guess = self.cell_guess + 8 - (self.cell_guess & 7)
                     self.d_cell_list = cuda.device_array((self.n_cell, self.cell_guess),
                                                          dtype=np.int64)
