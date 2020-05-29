@@ -81,9 +81,9 @@ class ql:
                 return
             Qveci = cuda.local.array(_qvi, nb.complex128)
             resi = cuda.local.array(_rei, nb.float64)
-            for _ in range(self._qvi[0]):
+            for _ in range(Qveci.shape[0]):
                 resi[_] = 0
-                for __ in range(self._qvi[1]):
+                for __ in range(Qveci.shape[1]):
                     Qveci[_, __] = 0 + 0j
             nn = 0.0
             for j in range(nc[i] - 1):
