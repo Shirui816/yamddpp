@@ -96,14 +96,16 @@ class ql:
     def _ql_local_func(self):
         _qvi = self._qvi
         _rei = self._rei
+        nb_complex = self.complex
+        nb_float = self.float
 
         @cuda.jit(void(self.float[:, :], self.float[:], self.float, int32[:, :], int32[:], int32[:], self.float[:, :]))
         def _ql_local(x, box, rc, nl, nc, ls, ret):
             i = cuda.grid(1)
             if i >= x.shape[0]:
                 return
-            Qveci = cuda.local.array(_qvi, self.complex)
-            resi = cuda.local.array(_rei, self.float)
+            Qveci = cuda.local.array(_qvi, nb_complex)
+            resi = cuda.local.array(_rei, nb_float)
             for _ in range(Qveci.shape[0]):
                 resi[_] = 0
                 for __ in range(Qveci.shape[1]):
@@ -147,7 +149,7 @@ class ql:
         @cuda.jit(
             void(self.float[:, :], self.float[:], self.float, int32[:, :], int32[:], int32[:], self.complex[:, :, :],
                  int32[:]))
-        def _ql_avg(x, box, rc, nl, nc, ls, Qvec, n_bonds):
+        def _ql_avg(x, box, rc, nl, nc, ls, qvec, n_bonds):
             i = cuda.grid(1)
             if i >= x.shape[0]:
                 return
@@ -173,7 +175,7 @@ class ql:
                 for _l in range(ls.shape[0]):
                     l = ls[_l]
                     for m in range(-l, l + 1):
-                        Qvec[i, _l, m + l] += sphHar(l, m, cosTheta, phi)  # thread-safe
+                        qvec[i, _l, m + l] += sphHar(l, m, cosTheta, phi)  # thread-safe
             cuda.atomic.add(n_bonds, 0, nn)
 
         return _ql_avg
