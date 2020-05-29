@@ -18,19 +18,11 @@ class ql:
         self.cu_ql_avg = self._ql_avg_func()
         self.nlist = nlist(self.frame, contain_self=1, cell_guess=cell_guess, n_guess=n_guess)
         self.r_cut = frame.r_cut
-        dtype = self.frame.x.dtype
+        self.dtype = self.frame.x.dtype
         self.q_local = None
         self.ql_avg = None
         global sphHar
         sphHar = gen_sph(self.frame.x.dtype)
-        if dtype == np.dtype(np.float64):
-            self.float = float64
-            self.complex = complex128
-            self.np_complex = np.complex128
-        else:
-            self.float = float32
-            self.complex = complex64
-            self.np_complex = np.complex64
 
     def update(self, x=None, box=None, rc=None):
         if x is not None:
@@ -96,8 +88,14 @@ class ql:
     def _ql_local_func(self):
         _qvi = self._qvi
         _rei = self._rei
-        complex = self.complex
-        float = self.float
+        if self.dtype == np.dtype(np.float64):
+            self.float = float64
+            self.complex = complex128
+            self.np_complex = np.complex128
+        else:
+            self.float = float32
+            self.complex = complex64
+            self.np_complex = np.complex64
 
         @cuda.jit(void(self.float[:, :], self.float[:], self.float, int32[:, :], int32[:], int32[:], self.float[:, :]))
         def _ql_local(x, box, rc, nl, nc, ls, ret):
@@ -145,6 +143,15 @@ class ql:
         return _ql_local
 
     def _ql_avg_func(self):
+        if self.dtype == np.dtype(np.float64):
+            self.float = float64
+            self.complex = complex128
+            self.np_complex = np.complex128
+        else:
+            self.float = float32
+            self.complex = complex64
+            self.np_complex = np.complex64
+
         @cuda.jit(
             void(self.float[:, :], self.float[:], self.float, int32[:, :], int32[:], int32[:], self.complex[:, :, :],
                  int32[:]))
