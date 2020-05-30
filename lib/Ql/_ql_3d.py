@@ -12,13 +12,13 @@ class ql:
         self.frame = frame
         self.gpu = frame.gpu
         self.ls = ls
-        self._qvi = (ls.shape[0], int(2 * ls.max() + 1))
-        self._rei = ls.shape[0]
+        self._n_m = int(2 * np.max(ls) + 1)  # -l ~ 0 ~ l
+        self._n_l = ls.shape[0]  # number of l
         self.nlist = nlist(self.frame, contain_self=1,
                            cell_guess=cell_guess, n_guess=n_guess)
         self.r_cut = frame.r_cut
         self.dtype = self.frame.x.dtype
-        self.q_local = None
+        self.ql_local = None
         self.ql_avg = None
         global sphHar
         sphHar = gen_sph(self.frame.x.dtype)
@@ -30,6 +30,7 @@ class ql:
             self.complex = complex64
         self.cu_ql_local = self._ql_local_func()
         self.cu_ql_avg = self._ql_avg_func()
+        self.n_bonds = None
 
     def update(self, x=None, box=None, rc=None, mode='all'):
         if x is not None:
@@ -50,7 +51,7 @@ class ql:
             tpb = device.WARP_SIZE
             bpg = int(np.ceil(self.frame.x.shape[0] / tpb))
             if mode == 'all' or mode == 'local':
-                self.ql_local = np.zeros((self.frame.x.shape[0], self.ls.shape[0]),
+                self.ql_local = np.zeros((self.frame.x.shape[0], self._n_l),
                                          dtype=self.frame.x.dtype)
                 d_ql_local = cuda.to_device(self.ql_local)
                 self.cu_ql_local[bpg, tpb](
@@ -66,9 +67,9 @@ class ql:
                 cuda.synchronize()
             if mode == 'all' or mode == 'avg':
                 self.ql_avg = np.zeros(self.ls.shape[0])
-                q_vec_real = np.zeros((self.ls.shape[0], int(2 * self.ls.max() + 1)),
+                q_vec_real = np.zeros((self.ls.shape[0], self._n_m),
                                       dtype=self.frame.x.dtype)
-                q_vec_imag = np.zeros((self.ls.shape[0], int(2 * self.ls.max() + 1)),
+                q_vec_imag = np.zeros((self.ls.shape[0], self._n_m),
                                       dtype=self.frame.x.dtype)
                 d_qvec_real = cuda.to_device(q_vec_real)
                 d_qvec_imag = cuda.to_device(q_vec_imag)
@@ -100,8 +101,8 @@ class ql:
                     self.ql_avg[i] = sqrt(tmp * 4 * np.pi / (2 * self.ls[i] + 1))
 
     def _ql_local_func(self):
-        _qvi = self._qvi
-        _rei = self._rei
+        _qvi = (self._n_l, self._n_m)
+        _rei = (self._n_l,)
         nb_complex = self.complex
         nb_float = self.float
 
