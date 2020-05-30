@@ -183,8 +183,8 @@ class ql:
                     l = ls[_l]
                     for m in range(-l, l + 1):
                         tmp = sphHar(l, m, cosTheta, phi)
-                        cuda.atomic.add(q_vec_real[_l], m + 1, tmp.real)
-                        cuda.atomic.add(q_vec_imag[_l], m + 1, tmp.imag)
+                        cuda.atomic.add(q_vec_real[_l], m + l, tmp.real)
+                        cuda.atomic.add(q_vec_imag[_l], m + l, tmp.imag)
                         # use very small arrays.
                         # qvec[i, _l, m + l] += sphHar(l, m, cosTheta, phi)  # thread-safe
             cuda.atomic.add(n_bonds, 0, nn)
