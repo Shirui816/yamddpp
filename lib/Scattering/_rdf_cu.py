@@ -17,7 +17,7 @@ def _add_local_arr_mois_1(a, b):
         a[i] = a[i] + b[i] - 1
 
 
-def rdf_of_ab_cu(a, b, box, da, db, bs, rc, gpu=0):
+def rdf_of_ab_cu_func(ndim, gpu=0):
     r"""RDF within some r_cut, by gpu.
     :param a: positions of a np.ndarray, (n_p, n_d)
     :param b: positions of b np.ndarray, (n_p, n_d)
@@ -29,12 +29,7 @@ def rdf_of_ab_cu(a, b, box, da, db, bs, rc, gpu=0):
     :param gpu: gpu index, use 0 by default.
     :return: (r, rdf)
     """
-    ret = np.zeros((a.shape[0], int(rc / bs) + 1), dtype=np.int64)
-    r_max = float(ret.shape[1] * bs)
-    dim = np.ones(a.shape[1], dtype=np.int64) * 3
-    ndim = a.shape[1]
-    ibox = np.asarray(np.round(box / rc), dtype=np.int64)
-    cl, cc = cu_cell_list_argsort(b, box, ibox, gpu=gpu)
+    dim = np.ones(ndim, dtype=np.int64) * 3
 
     # ndim: dimentsion, a.shape[1], jit does not support
     # using a.shape[1] directly in cuda.local.array creation,
@@ -86,16 +81,23 @@ def rdf_of_ab_cu(a, b, box, da, db, bs, rc, gpu=0):
                     jdx = int(dij / _bs)
                     cuda.atomic.add(_ret[i], jdx, 1)
 
-    with cuda.gpus[0]:
-        device = cuda.get_current_device()
-        tpb = device.WARP_SIZE
-        bpg = ceil(a.shape[0] / tpb)
-        _rdf[bpg, tpb](
-            a, b, box, ibox, da, db, bs, r_max, cl, cc, ret, dim
-        )
-    rho_b = b.shape[0] / np.multiply.reduce(box)
-    r = (np.arange(ret.shape[1] + 1) + 0.5) * bs
-    dV = 4 / 3 * np.pi * np.diff(r ** 3)
-    ret = ret / np.expand_dims(dV, 0) / rho_b
-    np.savetxt('rdf.txt', np.vstack([r[:-1], ret.mean(axis=0)]).T, fmt='%.6f')
-    return r[:-1], ret
+    def _call(a, b, box, da, db, bs, rc):
+        ret = np.zeros((a.shape[0], int(rc / bs) + 1), dtype=np.int64)
+        r_max = float(ret.shape[1] * bs)
+        ibox = np.asarray(np.round(box / rc), dtype=np.int64)
+        cl, cc = cu_cell_list_argsort(b, box, ibox, gpu=gpu)
+        with cuda.gpus[gpu]:
+            device = cuda.get_current_device()
+            tpb = device.WARP_SIZE
+            bpg = ceil(a.shape[0] / tpb)
+            _rdf[bpg, tpb](
+                a, b, box, ibox, da, db, bs, r_max, cl, cc, ret, dim
+            )
+        rho_b = b.shape[0] / np.multiply.reduce(box)
+        r = (np.arange(ret.shape[1] + 1) + 0.5) * bs
+        dV = 4 / 3 * np.pi * np.diff(r ** 3)
+        ret = ret / np.expand_dims(dV, 0) / rho_b
+        np.savetxt('rdf.txt', np.vstack([r[:-1], ret.mean(axis=0)]).T, fmt='%.6f')
+        return r[:-1], ret
+
+    return _call
