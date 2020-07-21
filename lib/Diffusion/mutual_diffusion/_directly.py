@@ -38,9 +38,9 @@ def _cu_kernel_cum(x, ret):  # ret -> (n_frames,)
         return
     if j >= x.shape[0] - i:
         return
-    for k in range(x.shape[1]):
+    for k in range(x.shape[1] - 1):
         pkt = x[i + j, k]
-        for l in range(k, x.shape[1]):
+        for l in range(k + 1, x.shape[1]):
             pl0 = x[i, l]
             dr2 = distance2(pkt, pl0)
             cuda.atomic.add(ret, j, 2 * dr2)
