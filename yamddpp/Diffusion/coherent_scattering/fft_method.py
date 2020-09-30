@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def coherent_sacttering(traj, n_bins):
+def coherent_scattering(traj, n_bins):
     min_r, max_r = traj.min(), traj.max()
     n_frames, n_dim = traj.shape[0], traj.shape[-1]
     frho_t = np.empty((n_frames, *(n_bins,) * n_dim))
