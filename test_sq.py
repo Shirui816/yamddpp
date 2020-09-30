@@ -1,6 +1,6 @@
 import numpy as np
 
-from lib.Scattering import rdf_xy
+from yamddpp.Scattering import rdf_xy
 
 # x = np.random.random((100,3))
 # y = np.random.random((100,3))
