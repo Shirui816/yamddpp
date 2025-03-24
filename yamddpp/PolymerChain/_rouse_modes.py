@@ -67,7 +67,7 @@ def normal_modes(pos: np.ndarray, modes=None) -> np.ndarray:
             "Please use UNWRAPPED coordinates to calculate the 0th mode!"
         )
     # factors = 1 / chain_length * np.asarray([
-    #    np.cos(p * np.pi / chain_length * (np.arange(1, chain_length + 1)))
+    #    np.cos(p * np.pi / chain_length * (np.arange(1, chain_length + 1) - 1 / 2.))
     #    for p in modes
     # ])
     s = np.expand_dims(np.arange(1, chain_length + 1) - 1 / 2., 0) * np.pi / chain_length
